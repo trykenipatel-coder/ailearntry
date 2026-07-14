@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Quiz Generator - AI Learning System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar" id="mainNav">
+        <a href="../index.html" class="logo">AI<span>Learn</span></a>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="quizzes.html">Quizzes</a></li>
+            <li><a href="create-quiz.html">Create Quiz</a></li>
+            <li><a href="ai-quiz.html">AI Quiz</a></li>
+            <li><a href="access-codes.html">Codes</a></li>
+            <li><a href="materials.html">Materials</a></li>
+            <li><a href="leaderboard.html">Leaderboard</a></li>
+            <li><a href="analytics.html">Analytics</a></li>
+        
+        </ul>
+    </nav>
+
+    <main class="container dashboard">
+        <div class="dashboard-header">
+            <h1>AI Quiz Generator</h1>
+            <p>Generate quizzes automatically by entering a topic.</p>
+        </div>
+
+        <div class="generate-section">
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Topic</label>
+                    <input type="text" id="ai-topic" placeholder="e.g. Human Digestive System" required>
+                </div>
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text" id="ai-subject" placeholder="e.g. Science">
+                </div>
+            </div>
+            <div style="margin:16px 0">
+                <label>Difficulty Distribution</label>
+                <div style="display:flex;gap:12px;margin-top:6px;align-items:center">
+                    <div style="flex:1">
+                        <label style="font-size:0.8rem;display:block;margin-bottom:4px">Easy</label>
+                        <input type="number" id="ai-easy" value="2" min="0" max="20" style="width:100%;padding:10px;border:2px solid var(--border);border-radius:var(--radius);text-align:center" onchange="updateTotalQuestions()">
+                    </div>
+                    <div style="flex:1">
+                        <label style="font-size:0.8rem;display:block;margin-bottom:4px">Medium</label>
+                        <input type="number" id="ai-medium" value="2" min="0" max="20" style="width:100%;padding:10px;border:2px solid var(--border);border-radius:var(--radius);text-align:center" onchange="updateTotalQuestions()">
+                    </div>
+                    <div style="flex:1">
+                        <label style="font-size:0.8rem;display:block;margin-bottom:4px">Hard</label>
+                        <input type="number" id="ai-hard" value="1" min="0" max="20" style="width:100%;padding:10px;border:2px solid var(--border);border-radius:var(--radius);text-align:center" onchange="updateTotalQuestions()">
+                    </div>
+                    <div style="flex:1;text-align:center">
+                        <label style="font-size:0.8rem;display:block;margin-bottom:4px">Total</label>
+                        <div id="ai-total-questions" style="padding:10px;font-weight:700;font-size:1.2rem">5 total</div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-success btn-lg" id="ai-generate-btn" onclick="generateAIQuiz()">Generate with AI</button>
+        </div>
+
+        <div id="ai-output">
+            <div class="alert alert-info">
+                Enter a topic and click "Generate with AI" to automatically create and publish a quiz.
+                <br><small>Access codes will be generated automatically for students to join.</small>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top:24px">
+            <div class="card-header">My Draft Quizzes</div>
+            <div id="drafts-container"><div class="loading"><div class="spinner"></div></div></div>
+        </div>
+    </main>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/mentor.js"></script>
+    <script>loadMyDrafts();</script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase + Gemini Setup Guide - AI Learning System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar" id="mainNav">
+        <a href="index.html" class="logo">AI<span>Learn</span></a>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="login.html">Login</a></li>
+            <li><a href="register.html">Register</a></li>
+        </ul>
+    </nav>
+
+    <main class="container dashboard">
+        <div class="dashboard-header">
+            <h1>Firebase + Gemini Setup Guide</h1>
+            <p>Step-by-step instructions to configure Firebase Authentication, Firestore, and Google Gemini API.</p>
+        </div>
+
+        <div class="card" style="margin-bottom:20px">
+            <div class="card-header">Prerequisites</div>
+            <ul style="padding-left:20px;line-height:2">
+                <li>Python 3.8+ installed</li>
+                <li>A Google account (for Firebase and Gemini)</li>
+                <li>VS Code or any code editor</li>
+            </ul>
+        </div>
+
+        <div class="card" style="margin-bottom:20px">
+            <div class="card-header">Step 1: Create a Firebase Project</div>
+            <ol style="padding-left:20px;line-height:2">
+                <li>Go to <a href="https://console.firebase.google.com" target="_blank">Firebase Console</a></li>
+                <li>Click <strong>Create a project</strong> (or select existing)</li>
+                <li>Enter project name (e.g., "ai-learning-system")</li>
+                <li>Disable Google Analytics (optional) → <strong>Create project</strong></li>
+            </ol>
+        </div>
+
+        <div class="card" style="margin-bottom:20px">
+            <div class="card-header">Step 2: Enable Authentication</div>
+            <ol style="padding-left:20px;line-height:2">
+                <li>In Firebase Console, go to <strong>Authentication</strong> → <strong>Get started</strong></li>
+                <li>Enable <strong>Email/Password</strong> sign-in method</li>
+                <li>Enable <strong>Google</strong> sign-in method → Configure consent screen</li>
+                <li>Go to <strong>Users</strong> tab → Add test users if needed</li>
+            </ol>
+        </div>
+
+        <div class="card" style="margin-bottom:20px">
+            <div class="card-header">Step 3: Create Firestore Database</div>
+            <ol style="padding-left:20px;line-height:2">
+                <li>Go to <strong>Firestore Database</strong> → <strong>Create database</strong></li>
+                <li>Choose location → <strong>Next</strong></li>
+                <li>Start in <strong>Test mode</strong> → <strong>Enable</strong></li>
+                <li>Later, apply the security rules from <code>firestore.rules</code></li>
+            </ol>
+        </div>
+
+        <div class="card" style="margin-bottom:20px">
+            <div class="card-header">Step 4: Get Firebase Admin SDK Credentials</div>
+            <ol style="padding-left:20px;line-height:2">
+                <li>Go to <strong>Project Settings</strong> → <strong>Service accounts</strong> tab</li>
+                <li>Click <strong>Generate new private key</strong></li>
+                <li>A JSON file downloads. Extract these values:</li>
+                <li><code>project_id</code> → <code>FIREBASE_PROJECT_ID</code> in <code>.env</code></li>
+                <li><code>private_key</code> → <code>FIREBASE_PRIVATE_KEY</code> in <code>.env</code></li>
+                <li><code>client_email</code> → <code>FIREBASE_CLIENT_EMAIL</code> in <code>.env</code></li>
+            </ol>
+        </div>
+
+        <div class="card" style="margin-bottom:20px">
+            <div class="card-header">Step 5: Get Firebase Web SDK Config</div>
+            <ol style="padding-left:20px;line-height:2">
+                <li>Go to <strong>Project Settings</strong> → <strong>General</strong> tab</li>
+                <li>Under <strong>Your apps</strong>, click <strong>Web app</strong></li>
+                <li>Register app (name: "ai-learning-web")</li>
+                <li>Copy the <code>firebaseConfig</code> values</li>
+                <li>Update <code>frontend/js/firebase_config.js</code> with these values</li>
+                <li>Also update <code>.env</code>: <code>FIREBASE_API_KEY</code>, <code>FIREBASE_AUTH_DOMAIN</code>, <code>FIREBASE_PROJECT_ID_WEB</code></li>
+            </ol>
+        </div>
+
+        <div class="card" style="margin-bottom:20px">
+            <div class="card-header">Step 6: Get Gemini API Key</div>
+            <ol style="padding-left:20px;line-height:2">
+                <li>Go to <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a></li>
+                <li>Click <strong>Get API Key</strong></li>
+                <li>Create API key (or use existing)</li>
+                <li>Copy the key → set <code>GEMINI_API_KEY</code> in <code>.env</code></li>
+            </ol>
+        </div>
+
+        <div class="card" style="margin-bottom:20px">
+            <div class="card-header">Step 7: Configure .env File</div>
+            <p>Open <code>.env</code> in the project root and fill in all values:</p>
+            <pre style="background:#1e293b;color:#e2e8f0;padding:16px;border-radius:8px;overflow-x:auto;margin-top:12px;font-size:0.85rem">
+FIREBASE_PROJECT_ID=your-project-id
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEv...\n-----END PRIVATE KEY-----\n"
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@your-project.iam.gserviceaccount.com
+FIREBASE_DATABASE_URL=https://your-project.firebaseio.com
+FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+FIREBASE_API_KEY=AIzaSy...
+FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+FIREBASE_PROJECT_ID_WEB=your-project-id
+GEMINI_API_KEY=AIzaSy...
+FLASK_SECRET_KEY=your-random-secret-key
+FLASK_DEBUG=True</pre>
+        </div>
+
+        <div class="card" style="margin-bottom:20px">
+            <div class="card-header">Step 8: Deploy Firestore Security Rules</div>
+            <ol style="padding-left:20px;line-height:2">
+                <li>In Firebase Console, go to <strong>Firestore Database</strong> → <strong>Rules</strong> tab</li>
+                <li>Paste the content from <code>firestore.rules</code></li>
+                <li>Click <strong>Publish</strong></li>
+            </ol>
+        </div>
+
+        <div class="card" style="margin-bottom:20px">
+            <div class="card-header">Step 9: Run the Application</div>
+            <pre style="background:#1e293b;color:#e2e8f0;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.85rem">
+# Install dependencies
+pip install -r requirements.txt
+
+# Start the server
+python run.py
+
+# Open in browser
+http://localhost:5000</pre>
+        </div>
+
+        <div class="card" style="margin-bottom:20px">
+            <div class="card-header">Troubleshooting</div>
+            <table>
+                <thead><tr><th>Issue</th><th>Solution</th></tr></thead>
+                <tbody>
+                    <tr><td><code>Firebase not initialized</code></td><td>Check .env values are correct and complete</td></tr>
+                    <tr><td><code>Invalid token</code></td><td>Clear browser cookies and try again</td></tr>
+                    <tr><td><code>Gemini API not available</code></td><td>Verify GEMINI_API_KEY in .env and check billing</td></tr>
+                    <tr><td><code>Permission denied</code></td><td>Check Firestore rules and authentication setup</td></tr>
+                    <tr><td>Google Sign-In popup blocked</td><td>Allow popups from localhost in browser</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Firestore Collections (Auto-created on first use)</div>
+            <div class="grid-3">
+                <div><strong>users</strong><br><small>User profiles with roles</small></div>
+                <div><strong>quizzes</strong><br><small>Quiz metadata</small></div>
+                <div><strong>questions</strong><br><small>Quiz questions</small></div>
+                <div><strong>quizResults</strong><br><small>Student quiz results</small></div>
+                <div><strong>analytics</strong><br><small>Student analytics</small></div>
+                <div><strong>violations</strong><br><small>Quiz violation logs</small></div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

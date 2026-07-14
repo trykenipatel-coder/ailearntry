@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Take Quiz - AI Learning System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .quiz-lockdown { user-select:none; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; }
+        .quiz-lockdown * { user-select:none; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; }
+        .quiz-lockdown input, .quiz-lockdown textarea { user-select:text; -webkit-user-select:text; -moz-user-select:text; -ms-user-select:text; }
+        .security-bar-enhanced { background:linear-gradient(135deg,#0f172a,#1e293b); border-radius:var(--radius-md); padding:16px 20px; margin-bottom:20px; color:white; }
+        .security-bar-enhanced .sec-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+        .security-bar-enhanced .sec-header .shield { width:32px;height:32px;background:rgba(99,102,241,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem; }
+        .security-bar-enhanced .sec-header h3 { color:white; font-size:0.875rem; margin:0; }
+        .security-bar-enhanced .sec-header .live-badge { margin-left:auto; padding:3px 10px; background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.3); border-radius:var(--radius-full); font-size:0.65rem; color:#86efac; font-weight:600; }
+        .security-bar-enhanced .sec-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:6px; }
+        .security-bar-enhanced .sec-grid .sec-item { display:flex; align-items:center; gap:6px; padding:5px 10px; border-radius:var(--radius-sm); font-size:0.7rem; color:rgba(255,255,255,0.6); background:rgba(255,255,255,0.04); }
+        .security-bar-enhanced .sec-grid .sec-item.active { color:rgba(255,255,255,0.9); background:rgba(99,102,241,0.12); }
+        .security-bar-enhanced .sec-grid .sec-item .dot { width:6px;height:6px;border-radius:50%;flex-shrink:0; }
+        .security-bar-enhanced .sec-grid .sec-item.active .dot { background:#22c55e; box-shadow:0 0 6px rgba(34,197,94,0.5); }
+        .security-bar-enhanced .sec-grid .sec-item .dot.inactive { background:var(--neutral-500); }
+    </style>
+</head>
+<body class="quiz-lockdown">
+    <nav class="navbar" id="mainNav">
+        <a href="../index.html" class="logo">AI<span>Learn</span></a>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="available-quizzes.html">Quizzes</a></li>
+            <li><a href="materials.html">Materials</a></li>
+        </ul>
+    </nav>
+
+    <main class="container dashboard">
+        <div class="quiz-container">
+            <div id="code-entry-screen">
+                <div class="card" style="text-align:center;padding:48px;max-width:480px;margin:0 auto">
+                    <div style="font-size:3rem;margin-bottom:12px">🔑</div>
+                    <h2 style="margin-bottom:8px">Enter Access Code</h2>
+                    <p style="color:var(--text-light);margin:0 0 20px;font-size:0.85rem">Please enter the access code provided by your mentor to start this quiz.</p>
+                    <div id="re-entry-hint" style="display:none"></div>
+                    <div id="code-error" class="alert alert-danger hidden" style="margin-bottom:16px;font-size:0.8rem"></div>
+                    <input type="text" id="access-code-input" placeholder="Enter access code (e.g. ABC12345)"
+                        style="width:100%;max-width:300px;padding:14px 20px;border:2px solid var(--border);border-radius:var(--radius);font-size:1.2rem;font-weight:700;letter-spacing:.15em;text-align:center;text-transform:uppercase;font-family:'SF Mono',monospace;margin-bottom:20px">
+                    <div>
+                        <button class="btn btn-primary btn-lg" onclick="validateAndStart()" id="validate-code-btn">Validate & Start</button>
+                    </div>
+                    <p style="color:var(--text-light);font-size:0.7rem;margin-top:16px">Don't have a code? Contact your mentor.</p>
+                </div>
+            </div>
+
+            <div id="already-completed-screen" class="hidden">
+                <div class="card" style="text-align:center;padding:60px 48px;max-width:500px;margin:0 auto">
+                    <div style="font-size:4rem;margin-bottom:16px">🚫</div>
+                    <h2 style="margin-bottom:12px;color:var(--red-600)">Quiz Already Completed</h2>
+                    <p style="color:var(--text-light);font-size:0.9rem;line-height:1.7;margin-bottom:24px">This quiz has already been completed. You cannot access it again unless another attempt is allowed according to the mentor's attempt limit or a valid Backup Access Code is provided.</p>
+                    <a href="dashboard.html" class="btn btn-primary">Back to Dashboard</a>
+                </div>
+            </div>
+
+            <div id="start-screen" class="hidden">
+                <div class="card" style="text-align:center;padding:48px">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="var(--brand-500)" stroke-width="1.5" style="width:48px;height:48px;margin-bottom:12px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <h2 id="quiz-title" style="margin-bottom:8px">Loading Quiz...</h2>
+                    <p style="color:var(--text-light);margin:0 0 8px">Read each question carefully and select the best answer.</p>
+                    <div style="max-width:400px;margin:16px auto 28px;padding:16px;background:var(--neutral-50);border-radius:var(--radius);font-size:0.75rem;color:var(--text-light);text-align:left;line-height:1.8">
+                        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> <strong>Browser Lockdown Active</strong></div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 16px;margin-top:8px">
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="var(--red-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Copy/Paste Blocked</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="var(--red-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Right-Click Blocked</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="var(--red-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Text Selection Disabled</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="var(--red-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Print Screen Blocked</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="var(--red-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>DevTools Blocked</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="var(--red-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Tab Switching Monitored</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="var(--amber-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:3px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Screenshot Detection Active</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:3px"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>Fullscreen Mode Active</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Time Tracking Active</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="var(--brand-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:3px"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><polyline points="4 4 9 4 9 9"/></svg>Randomized Question Order</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-lg" onclick="startQuiz()">Start Quiz</button>
+                </div>
+            </div>
+
+            <div id="quiz-screen" class="hidden">
+                <div id="security-bar"></div>
+                <div id="timer-display" class="quiz-timer">00:00</div>
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+
+                <div class="question-card" style="user-select:none;-webkit-user-select:none">
+                    <div class="question-number">
+                        <span id="question-number">Question 1 of 5</span>
+                        <span class="badge badge-info" id="question-difficulty" style="margin-left:8px">Easy</span>
+                    </div>
+                    <div class="question-text" id="question-text">Loading question...</div>
+                    <div class="options-list" id="options-container"></div>
+                </div>
+
+                <div style="display:flex;justify-content:space-between">
+                    <button class="btn btn-outline" id="prev-btn" onclick="prevQuestion()">Previous</button>
+                    <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()">Next Question</button>
+                </div>
+            </div>
+
+            <div id="result-screen" class="hidden">
+                <div id="result-loading" class="loading"><div class="spinner"></div>Calculating your results...</div>
+                <div id="result-content" class="hidden">
+                    <div class="card result-highlight" style="text-align:center;padding:40px">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--green-500)" stroke-width="1.5" style="width:48px;height:48px;margin-bottom:12px"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 5-5"/></svg>
+                        <h2 style="margin-bottom:8px">Quiz Submitted Successfully!</h2>
+                        <p style="color:var(--text-light);margin:0 0 20px;font-size:0.9rem">Your responses have been saved successfully.</p>
+                        <p style="color:var(--text-light);margin:0 0 8px;font-size:0.85rem">Thank you for completing the quiz.</p>
+                        <div class="score" id="score-display">0%</div>
+                        <div class="status-text" id="status-text" style="margin-bottom:20px"></div>
+                        <div style="font-size:0.85rem;color:var(--neutral-400);margin-bottom:20px">
+                            Redirecting to Dashboard in <strong id="redirect-countdown">5</strong> seconds...
+                        </div>
+                        <div class="progress-bar" style="height:6px;max-width:300px;margin:0 auto 24px">
+                            <div class="progress-fill" id="redirect-progress" style="width:100%;background:var(--brand-400);height:6px;transition:width 1s linear"></div>
+                        </div>
+                        <a href="dashboard.html" class="btn btn-primary">Go to Dashboard Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/student.js"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Create Quiz{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Create Quiz Manually</h1>
+    <p>Design your own quiz with custom questions.</p>
+</div>
+
+<div class="card" id="manual-quiz-form">
+    <div class="grid-2">
+        <div class="form-group">
+            <label>Quiz Topic</label>
+            <input type="text" id="quiz-topic" placeholder="e.g. Human Digestive System" required>
+        </div>
+        <div class="form-group">
+            <label>Subject</label>
+            <input type="text" id="quiz-subject" placeholder="e.g. Science">
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Difficulty Level</label>
+        <select id="quiz-difficulty">
+            <option value="Easy">Easy</option>
+            <option value="Medium">Medium</option>
+            <option value="Hard">Hard</option>
+            <option value="Mixed">Mixed</option>
+        </select>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:20px 0">
+        <h3>Questions</h3>
+        <button type="button" class="btn btn-success" onclick="addQuestion()">+ Add Question</button>
+    </div>
+
+    <div id="questions-container">
+        <div class="alert alert-info">Click "Add Question" to start building your quiz.</div>
+    </div>
+
+    <button type="button" class="btn btn-primary btn-block btn-lg" onclick="submitManualQuiz()" style="margin-top:20px">Create Quiz</button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/mentor.js"></script>
+<script>
+    // Add first question by default
+    addQuestion();
+</script>
+{% endblock %}

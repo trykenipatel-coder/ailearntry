@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard - AI Learning System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .rank-badge { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%; font-weight:700; font-size:0.8rem; }
+        .rank-1 { background:linear-gradient(135deg,#fbbf24,#f59e0b); color:#78350f; }
+        .rank-2 { background:linear-gradient(135deg,#d1d5db,#9ca3af); color:#374151; }
+        .rank-3 { background:linear-gradient(135deg,#d97706,#b45309); color:#fff; }
+        .rank-other { background:var(--neutral-100); color:var(--neutral-600); }
+        .lb-row { display:grid; grid-template-columns:60px 1fr 100px 100px 100px 100px; align-items:center; padding:12px 16px; border-bottom:1px solid var(--neutral-50); transition:background 0.15s; }
+        .lb-row:hover { background:var(--neutral-50); }
+        .lb-header { font-size:0.7rem; color:var(--text-light); text-transform:uppercase; letter-spacing:0.05em; font-weight:600; background:var(--neutral-50); border-bottom:2px solid var(--neutral-100); }
+        .lb-header:hover { background:var(--neutral-50); }
+        .stat-mini { text-align:center; padding:16px; border-radius:var(--radius); background:var(--neutral-50); }
+        .stat-mini .val { font-size:1.5rem; font-weight:800; color:var(--brand-600); }
+        .stat-mini .lbl { font-size:0.7rem; color:var(--text-light); margin-top:4px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar" id="mainNav">
+        <a href="../index.html" class="logo">AI<span>Learn</span></a>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="quizzes.html">Quizzes</a></li>
+            <li><a href="create-quiz.html">Create Quiz</a></li>
+            <li><a href="ai-quiz.html">AI Quiz</a></li>
+            <li><a href="access-codes.html">Codes</a></li>
+            <li><a href="materials.html">Materials</a></li>
+            <li><a href="leaderboard.html" style="color:var(--brand-600);font-weight:600">Leaderboard</a></li>
+            <li><a href="analytics.html">Analytics</a></li>
+        
+        </ul>
+    </nav>
+
+    <main class="container dashboard">
+        <div class="dashboard-header">
+            <h1>Student Leaderboard</h1>
+            <p>Competitive rankings based on quiz performance across all your quizzes.</p>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px">
+            <div class="stat-mini"><div class="val" id="lb-total">-</div><div class="lbl">Total Students</div></div>
+            <div class="stat-mini"><div class="val" id="lb-avg">-</div><div class="lbl">Avg Score</div></div>
+            <div class="stat-mini"><div class="val" id="lb-top" style="color:var(--green-600)">-</div><div class="lbl">Top Score</div></div>
+            <div class="stat-mini"><div class="val" id="lb-low" style="color:var(--red-500)">-</div><div class="lbl">Lowest Score</div></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header" style="display:flex;align-items:center;gap:8px">
+                <svg viewBox="0 0 24 24" fill="none" stroke="var(--brand-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 6 9 6 9z"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C17 4 18 9 18 9z"/><path d="M4 22h16"/><path d="M10 22V8a4 4 0 0 0-4-4H6v16"/><path d="M14 22V8a4 4 0 0 1 4-4h0v16"/></svg>
+                Rankings
+            </div>
+            <div id="leaderboard-container">
+                <div class="loading"><div class="spinner"></div></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/mentor.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth().then(function(auth) {
+                if (!auth || auth.role !== 'mentor') { window.location.href = '../login.html'; return; }
+                loadLeaderboard();
+            });
+        });
+    </script>
+</body>
+</html>

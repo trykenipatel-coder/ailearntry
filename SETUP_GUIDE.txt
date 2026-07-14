@@ -1,0 +1,96 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FIREBASE SETUP — SU AAPANU SU KYA MUKVANU
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📌 STEP 1: Firebase Project Banao
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. https://console.firebase.google.com par jao
+2. "Create a project" → name: "ai-learning-system"
+3. "Authentication" → "Get started" → "Sign-in method"
+   → Email/Password ENABLE karo
+   → Google ENABLE karo
+4. "Firestore Database" → "Create database"
+   → Start in test mode
+
+📌 STEP 2: Service Account JSON Download
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Project Settings → Service accounts → "Generate new private key"
+→ JSON file download thase → FILE Kholo → NICHE MUKVO:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+.env FILE MA AA 3 VALUE MUKO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+JSON file mathi "project_id" → .env ma FIREBASE_PROJECT_ID = 
+
+JSON file mathi "private_key" → .env ma FIREBASE_PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC...\n-----END PRIVATE KEY-----\n"
+
+JSON file mathi "client_email" → .env ma FIREBASE_CLIENT_EMAIL = 
+
+
+📌 STEP 3: Firebase Web SDK Config
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Project Settings → General → Your apps → Web app (</>) → Register
+→ Config code copy karo → AA 2 FILES MA MUKO:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FILE 1: frontend/js/firebase_config.js
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+const firebaseConfig = {
+    apiKey: "AIzaSy...",          ← Firebase SDK config mathi
+    authDomain: "...firebaseapp.com",
+    projectId: "...",
+    storageBucket: "...appspot.com",
+    messagingSenderId: "...",
+    appId: "1:..."
+};
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FILE 2: .env (AA 3 VALUE)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FIREBASE_API_KEY = AIzaSy...      ← same apiKey upar thi
+FIREBASE_AUTH_DOMAIN = your-project.firebaseapp.com
+FIREBASE_PROJECT_ID_WEB = your-project-id
+
+
+📌 STEP 4: Gemini API Key
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+https://aistudio.google.com/app/apikey → "Get API Key"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+.env MA MUKO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+GEMINI_API_KEY = AIzaSy...
+
+
+📌 STEP 5: Firestore Rules
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Firebase Console → Firestore Database → Rules tab
+→ firestore.rules file ni badhi content copy karine paste karo
+→ PUBLISH karo
+
+
+📌 STEP 6: .env NI BAKI VALUE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FIREBASE_DATABASE_URL = https://your-project.firebaseio.com
+FIREBASE_STORAGE_BUCKET = your-project.appspot.com
+FLASK_SECRET_KEY = koi-pan-random-string-likho-123
+FLASK_DEBUG = True
+
+
+📌 STEP 7: RUN KARO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VS Code Terminal ma:
+
+pip install -r requirements.txt
+python run.py
+
+http://localhost:5000
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SAMANJAS MA SAVAL HO TO PUCHO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

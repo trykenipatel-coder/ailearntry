@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Score Card - AI Learning System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        @page { size: A4 portrait; margin: 0; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html, body { height:100%; overflow:hidden; }
+        body { background:#e8e8e8; font-family:'Inter',sans-serif; }
+
+        .toolbar { padding:10px 24px; text-align:center; background:#fff; border-bottom:1px solid #e5e7eb; }
+        .toolbar button, .toolbar a { padding:7px 18px; border:none; border-radius:6px; font-size:0.78rem; font-weight:600; cursor:pointer; margin:0 3px; text-decoration:none; display:inline-block; }
+        .btn-print { background:#1a1a1a; color:#fff; }
+        .btn-close { background:#f3f4f6; color:#374151; }
+
+        .page { display:flex; justify-content:center; padding:10px 10px 0; }
+        .card {
+            width:794px; height:1123px; background:#fff; position:relative;
+            box-shadow:0 2px 20px rgba(0,0,0,0.08); overflow:hidden;
+            display:flex; flex-direction:column;
+        }
+
+        .card-border-outer { position:absolute; inset:6px; border:2px solid #1e3a5f; pointer-events:none; z-index:2; }
+        .card-border-inner { position:absolute; inset:10px; border:1px solid rgba(30,58,95,0.3); pointer-events:none; z-index:2; }
+
+        .accent-bar { height:4px; background:linear-gradient(90deg,#1e3a5f,#2563eb,#1e3a5f); flex-shrink:0; }
+
+        .card-body { flex:1; display:flex; flex-direction:column; padding:18px 44px 0; }
+
+        .header { text-align:center; margin-bottom:12px; }
+        .header-logo { font-size:9px; font-weight:600; color:#1e3a5f; text-transform:uppercase; letter-spacing:3px; }
+        .header-title { font-family:'Crimson Pro',serif; font-size:26px; font-weight:700; color:#1e3a5f; letter-spacing:2px; text-transform:uppercase; line-height:1.1; }
+        .header-sub { font-size:10px; color:#6b7280; letter-spacing:1px; margin-top:1px; }
+        .header-line { width:50px; height:2px; background:#1e3a5f; margin:6px auto 0; }
+
+        .student-section { text-align:center; margin-bottom:10px; }
+        .student-label { font-size:9px; color:#9ca3af; text-transform:uppercase; letter-spacing:2px; }
+        .student-name { font-family:'Crimson Pro',serif; font-size:24px; font-weight:700; color:#111827; line-height:1.1; }
+        .student-code { font-size:10px; color:#6b7280; margin-top:1px; }
+        .completed-text { font-size:10px; color:#9ca3af; font-style:italic; margin-top:3px; }
+
+        .quiz-section { text-align:center; margin-bottom:12px; }
+        .quiz-topic { font-size:18px; font-weight:700; color:#1e3a5f; }
+        .quiz-meta { font-size:10px; color:#6b7280; margin-top:2px; }
+        .quiz-meta span { margin:0 6px; }
+
+        .score-row { display:flex; align-items:center; justify-content:center; gap:30px; margin-bottom:12px; }
+        .score-circle {
+            width:110px; height:110px; border-radius:50%; flex-shrink:0;
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+        }
+        .score-circle.pass { background:linear-gradient(135deg,#059669,#10b981); }
+        .score-circle.fail { background:linear-gradient(135deg,#dc2626,#ef4444); }
+        .score-value { font-size:34px; font-weight:700; color:#fff; line-height:1; }
+        .score-unit { font-size:10px; color:rgba(255,255,255,0.85); font-weight:500; }
+        .score-label { font-size:9px; color:#9ca3af; text-transform:uppercase; letter-spacing:2px; margin-top:4px; text-align:center; }
+
+        .badge-id-row { display:flex; justify-content:center; align-items:center; gap:16px; margin-bottom:10px; }
+        .result-badge {
+            display:inline-flex; align-items:center; gap:4px;
+            padding:4px 16px; border-radius:4px; font-size:11px; font-weight:700;
+            text-transform:uppercase; letter-spacing:1px;
+        }
+        .result-badge.pass { background:#d1fae5; color:#065f46; border:1px solid #a7f3d0; }
+        .result-badge.fail { background:#fee2e2; color:#991b1b; border:1px solid #fecaca; }
+        .cert-id { font-size:9px; color:#9ca3af; letter-spacing:1px; }
+
+        .stats-grid {
+            display:grid; grid-template-columns:repeat(4,1fr); gap:0;
+            border:1px solid #e5e7eb; margin-bottom:10px; flex-shrink:0;
+        }
+        .stat-item { background:#f9fafb; padding:8px 4px; text-align:center; border-right:1px solid #e5e7eb; }
+        .stat-item:last-child { border-right:none; }
+        .stat-value { font-size:15px; font-weight:700; color:#111827; }
+        .stat-label { font-size:8px; color:#9ca3af; text-transform:uppercase; letter-spacing:0.3px; margin-top:1px; }
+
+        .divider { width:100%; height:1px; background:#e5e7eb; margin-bottom:10px; flex-shrink:0; }
+
+        .footer { display:flex; justify-content:space-between; align-items:flex-end; padding-bottom:18px; flex-shrink:0; }
+        .sig-block { text-align:center; width:170px; }
+        .sig-line { width:100%; height:1px; background:#374151; margin-bottom:3px; }
+        .sig-name { font-size:12px; font-weight:700; color:#1e3a5f; }
+        .sig-title { font-size:8px; color:#9ca3af; text-transform:uppercase; letter-spacing:1px; }
+
+        .stamp-block { text-align:center; }
+        .stamp-circle {
+            width:65px; height:65px; border-radius:50%; border:2px solid #dc2626;
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            transform:rotate(-12deg); opacity:0.8;
+        }
+        .stamp-check { font-size:18px; color:#dc2626; line-height:1; }
+        .stamp-text { font-size:7px; font-weight:700; color:#dc2626; letter-spacing:1px; text-transform:uppercase; }
+
+        .date-block { text-align:right; width:130px; }
+        .date-label { font-size:8px; color:#9ca3af; text-transform:uppercase; letter-spacing:1px; }
+        .date-value { font-size:11px; color:#374151; font-weight:500; }
+
+        .accent-bottom { height:4px; background:linear-gradient(90deg,#1e3a5f,#2563eb,#1e3a5f); flex-shrink:0; }
+
+        @media print {
+            .toolbar { display:none !important; }
+            body { background:#fff; margin:0; overflow:visible; }
+            html { overflow:visible; }
+            .page { padding:0; }
+            .card { box-shadow:none; margin:0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar" id="toolbar">
+        <button class="btn-print" onclick="window.print()">Save as PDF</button>
+        <button class="btn-close" onclick="window.close()">Close</button>
+    </div>
+
+    <div class="page">
+        <div class="card">
+            <div class="card-border-outer"></div>
+            <div class="card-border-inner"></div>
+
+            <div class="accent-bar"></div>
+
+            <div class="card-body">
+                <div class="header">
+                    <div class="header-logo">AI Learning System</div>
+                    <div class="header-title">Score Card</div>
+                    <div class="header-sub">Certificate of Academic Achievement</div>
+                    <div class="header-line"></div>
+                </div>
+
+                <div class="student-section">
+                    <div class="student-label">Awarded to</div>
+                    <div class="student-name" id="sc-name">Loading...</div>
+                    <div class="student-code" id="sc-code">-</div>
+                    <div class="completed-text">for successful completion of the following assessment</div>
+                </div>
+
+                <div class="quiz-section">
+                    <div class="quiz-topic" id="sc-topic">-</div>
+                    <div class="quiz-meta">
+                        <span id="sc-difficulty">-</span>
+                        <span>|</span>
+                        <span id="sc-date">-</span>
+                    </div>
+                </div>
+
+                <div class="score-row">
+                    <div>
+                        <div class="score-circle pass" id="sc-circle">
+                            <div class="score-value" id="sc-score">-</div>
+                            <div class="score-unit">%</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="badge-id-row">
+                            <div class="result-badge pass" id="sc-badge">PASS</div>
+                        </div>
+                        <div class="cert-id" id="sc-cert-id">Certificate ID: -</div>
+                        <div class="score-label">Overall Score</div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="sc-marks">-</div>
+                        <div class="stat-label">Marks Obtained</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="sc-accuracy">-</div>
+                        <div class="stat-label">Accuracy</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="sc-time">-</div>
+                        <div class="stat-label">Time Taken</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="sc-total">-</div>
+                        <div class="stat-label">Total Questions</div>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="footer">
+                    <div class="sig-block">
+                        <div class="sig-line"></div>
+                        <div class="sig-name" id="sc-mentor">-</div>
+                        <div class="sig-title">Mentor / Instructor</div>
+                    </div>
+
+                    <div class="stamp-block">
+                        <div class="stamp-circle">
+                            <div class="stamp-check">&#10003;</div>
+                            <div class="stamp-text">Verified</div>
+                        </div>
+                    </div>
+
+                    <div class="date-block">
+                        <div class="date-label">Date of Issue</div>
+                        <div class="date-value" id="sc-issue-date">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accent-bottom"></div>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script>
+        function formatTime(sec) {
+            if (!sec) return '0s';
+            var m = Math.floor(sec / 60);
+            var s = sec % 60;
+            return m > 0 ? m + 'm ' + s + 's' : s + 's';
+        }
+
+        function fmtDate(ds) {
+            if (!ds) return '-';
+            var d = new Date(ds.replace(' ', 'T'));
+            var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+        }
+
+        function fmtDateFull(ds) {
+            if (!ds) return '-';
+            var d = new Date(ds.replace(' ', 'T'));
+            var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+            return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+        }
+
+        async function load() {
+            var qid = new URLSearchParams(window.location.search).get('quiz_id');
+            if (!qid) { document.getElementById('sc-name').textContent = 'No quiz specified'; return; }
+
+            try {
+                var r = await fetch('/api/student/scorecard/' + qid, { credentials: 'include' });
+                var j = await r.json();
+                if (!j.success) { document.getElementById('sc-name').textContent = j.message || 'Error'; return; }
+
+                var d = j.data;
+                document.getElementById('sc-name').textContent = d.student.name;
+                document.getElementById('sc-code').textContent = 'Student Code: ' + (d.student.student_code || '-');
+                document.getElementById('sc-topic').textContent = d.quiz.topic;
+                document.getElementById('sc-difficulty').textContent = 'Difficulty: ' + d.quiz.difficulty;
+                document.getElementById('sc-date').textContent = 'Date: ' + fmtDate(d.result.date);
+                document.getElementById('sc-score').textContent = d.result.accuracy;
+                document.getElementById('sc-accuracy').textContent = d.result.accuracy + '%';
+                document.getElementById('sc-time').textContent = formatTime(d.result.time_taken);
+                document.getElementById('sc-marks').textContent = d.result.marks + '/' + d.result.total_questions;
+                document.getElementById('sc-total').textContent = d.result.total_questions;
+                document.getElementById('sc-mentor').textContent = d.mentor.name;
+                document.getElementById('sc-cert-id').textContent = 'Certificate ID: ' + d.cert_id;
+                document.getElementById('sc-issue-date').textContent = fmtDateFull(d.result.date);
+
+                var circle = document.getElementById('sc-circle');
+                var badge = document.getElementById('sc-badge');
+                if (d.result.status === 'Pass') {
+                    circle.className = 'score-circle pass';
+                    badge.className = 'result-badge pass';
+                    badge.textContent = 'PASS';
+                } else {
+                    circle.className = 'score-circle fail';
+                    badge.className = 'result-badge fail';
+                    badge.textContent = 'FAIL';
+                }
+
+                document.title = 'Score Card - ' + d.student.name;
+            } catch (e) {
+                document.getElementById('sc-name').textContent = 'Could not load scorecard';
+            }
+        }
+
+        load();
+    </script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Available Quizzes{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Available Quizzes</h1>
+    <p>Select a quiz to test your knowledge.</p>
+</div>
+
+<div id="quizzes-container" class="grid-2">
+    <div class="loading">
+        <div class="spinner"></div>
+        Loading quizzes...
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/student.js"></script>
+<script>loadAvailableQuizzes();</script>
+{% endblock %}

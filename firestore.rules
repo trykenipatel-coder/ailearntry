@@ -1,0 +1,100 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper: get user role from custom claims or users collection
+    function getUserRole() {
+      return request.auth.token.role;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && getUserRole() == 'admin';
+    }
+
+    function isMentor() {
+      return isAuthenticated() && getUserRole() == 'mentor';
+    }
+
+    function isStudent() {
+      return isAuthenticated() && getUserRole() == 'student';
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // ─── USERS COLLECTION ──────────────────────────────────────────
+    match /users/{userId} {
+      // Users can read their own data; admins can read all
+      allow read: if isOwner(userId) || isAdmin() || isMentor();
+      // Users can create their own profile; admins can create any
+      allow create: if isOwner(userId);
+      // Users can update their own non-role data; admins can update any
+      allow update: if isOwner(userId) || isAdmin();
+      // Only admins can delete users
+      allow delete: if isAdmin();
+    }
+
+    // ─── QUIZZES COLLECTION ────────────────────────────────────────
+    match /quizzes/{quizId} {
+      // Anyone authenticated can read quizzes
+      allow read: if isAuthenticated();
+      // Mentors and admins can create quizzes
+      allow create: if isMentor() || isAdmin();
+      // Creator or admin can update
+      allow update: if (isMentor() && resource.data.createdBy == request.auth.uid) || isAdmin();
+      // Only admins can delete
+      allow delete: if isAdmin();
+    }
+
+    // ─── QUESTIONS COLLECTION ──────────────────────────────────────
+    match /questions/{questionId} {
+      allow read: if isAuthenticated();
+      allow create: if isMentor() || isAdmin();
+      allow update: if isMentor() || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ─── QUIZ RESULTS COLLECTION ───────────────────────────────────
+    match /quizResults/{resultId} {
+      // Students can read their own results; mentors and admins can read all
+      allow read: if isStudent() && resource.data.studentId == request.auth.uid
+                   || isMentor() || isAdmin();
+      // Students can create their own results
+      allow create: if isStudent();
+      // No updates to results (immutable)
+      allow update: if false;
+      // Only admins can delete
+      allow delete: if isAdmin();
+    }
+
+    // ─── ANALYTICS COLLECTION ──────────────────────────────────────
+    match /analytics/{studentId} {
+      // Students can read their own analytics; mentors and admins can read all
+      allow read: if isOwner(studentId) || isMentor() || isAdmin();
+      // System (admin) creates analytics
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ─── VIOLATIONS COLLECTION ─────────────────────────────────────
+    match /violations/{violationId} {
+      allow read: if isAuthenticated();
+      // System creates violations
+      allow create: if isAuthenticated();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

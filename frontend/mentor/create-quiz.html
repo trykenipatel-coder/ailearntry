@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Quiz - AI Learning System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar" id="mainNav">
+        <a href="../index.html" class="logo">AI<span>Learn</span></a>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="quizzes.html">Quizzes</a></li>
+            <li><a href="create-quiz.html">Create Quiz</a></li>
+            <li><a href="ai-quiz.html">AI Quiz</a></li>
+            <li><a href="access-codes.html">Codes</a></li>
+            <li><a href="materials.html">Materials</a></li>
+            <li><a href="leaderboard.html">Leaderboard</a></li>
+            <li><a href="analytics.html">Analytics</a></li>
+        
+        </ul>
+    </nav>
+
+    <main class="container dashboard">
+        <div class="dashboard-header">
+            <h1>Create Quiz Manually</h1>
+            <p>Design your own quiz with custom questions.</p>
+        </div>
+
+        <div class="card" id="manual-quiz-form">
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Quiz Topic</label>
+                    <input type="text" id="quiz-topic" placeholder="e.g. Human Digestive System" required>
+                </div>
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text" id="quiz-subject" placeholder="e.g. Science">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Difficulty Level</label>
+                <select id="quiz-difficulty">
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                    <option value="Mixed">Mixed</option>
+                </select>
+            </div>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin:20px 0">
+                <h3>Questions</h3>
+                <button type="button" class="btn btn-success" onclick="addQuestion()">+ Add Question</button>
+            </div>
+
+            <div id="questions-container"></div>
+
+            <button type="button" class="btn btn-primary btn-block btn-lg" onclick="submitManualQuiz()" style="margin-top:20px">Create Quiz</button>
+        </div>
+    </main>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/mentor.js"></script>
+    <script>addQuestion();</script>
+</body>
+</html>
