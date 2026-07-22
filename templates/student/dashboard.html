@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Student Dashboard</h1>
+    <p>Welcome back, {{ session.name }}! Track your learning progress.</p>
+</div>
+
+<div class="stats-grid" id="stats-container">
+    <div class="stat-card">
+        <div class="label">Total Quizzes</div>
+        <div class="value" id="total-quizzes">-</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Average Accuracy</div>
+        <div class="value" id="avg-accuracy">-%</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Passed</div>
+        <div class="value" id="passed">-</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Failed</div>
+        <div class="value" id="failed">-</div>
+    </div>
+</div>
+
+<div id="prediction-container"></div>
+
+<div class="grid-2" style="margin-top:24px">
+    <div class="card">
+        <div class="card-header">Recent Results</div>
+        <div class="table-container">
+            <table id="recent-results">
+                <thead>
+                    <tr><th>Topic</th><th>Score</th><th>Accuracy</th><th>Status</th><th>Date</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">Quick Actions</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+            <a href="/student/available-quizzes" class="btn btn-primary btn-block">Browse Available Quizzes</a>
+            <a href="/student/results" class="btn btn-outline btn-block">View All Results</a>
+            <a href="/student/performance" class="btn btn-outline btn-block">Performance Analytics</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/student.js"></script>
+<script>loadStudentDashboard();</script>
+{% endblock %}

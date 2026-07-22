@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proctoring Review — AILearn</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .review-wrap { max-width:1200px; margin:0 auto; padding:32px 48px; }
+        .review-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; }
+        .review-header h1 { font-size:22px; font-weight:800; }
+        .review-header p { font-size:13px; color:var(--text-secondary); }
+        .back-btn { padding:8px 16px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text-secondary); font-size:13px; font-weight:500; cursor:pointer; font-family:inherit; text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
+        .back-btn:hover { background:var(--bg-secondary); }
+        .info-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:14px; margin-bottom:28px; }
+        .info-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; }
+        .info-card .ic-label { font-size:11px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.3px; font-weight:600; margin-bottom:4px; }
+        .info-card .ic-value { font-size:16px; font-weight:700; }
+        .risk-badge { padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+        .risk-low { background:rgba(34,197,94,.1); color:#16a34a; }
+        .risk-medium { background:rgba(234,179,8,.1); color:#ca8a04; }
+        .risk-high { background:rgba(239,68,68,.1); color:#dc2626; }
+        .section-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; margin-bottom:20px; overflow:hidden; }
+        .section-head { padding:16px 20px; border-bottom:1px solid var(--border); }
+        .section-head h2 { font-size:15px; font-weight:700; }
+        .events-list { padding:12px; }
+        .event-item { display:flex; gap:14px; padding:14px; border-radius:10px; border:1px solid var(--border); margin-bottom:8px; transition:all .15s; }
+        .event-item:hover { border-color:var(--brand-200); }
+        .event-icon { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:16px; }
+        .event-icon.sev-low { background:rgba(34,197,94,.1); color:#16a34a; }
+        .event-icon.sev-medium { background:rgba(234,179,8,.1); color:#ca8a04; }
+        .event-icon.sev-high { background:rgba(239,68,68,.1); color:#dc2626; }
+        .event-info { flex:1; min-width:0; }
+        .event-type { font-size:13px; font-weight:600; margin-bottom:2px; }
+        .event-desc { font-size:12px; color:var(--text-secondary); }
+        .event-meta { font-size:11px; color:var(--text-tertiary); margin-top:4px; display:flex; gap:12px; }
+        .event-actions { display:flex; gap:6px; align-items:flex-start; }
+        .ev-btn { padding:4px 10px; border-radius:5px; border:1px solid var(--border); background:var(--surface); color:var(--text-secondary); font-size:11px; font-weight:500; cursor:pointer; font-family:inherit; }
+        .ev-btn:hover { background:var(--bg-secondary); }
+        .ev-btn.cleared { background:rgba(34,197,94,.1); color:#16a34a; border-color:rgba(34,197,94,.3); }
+        .screenshot-thumb { width:80px; height:60px; border-radius:6px; background:var(--bg-tertiary); object-fit:cover; border:1px solid var(--border); }
+        .action-section { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:24px; margin-bottom:20px; }
+        .action-section h3 { font-size:15px; font-weight:700; margin-bottom:12px; }
+        .action-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+        .action-option { padding:14px; border-radius:10px; border:2px solid var(--border); cursor:pointer; transition:all .15s; text-align:center; }
+        .action-option:hover { border-color:var(--brand-300); }
+        .action-option.selected { border-color:var(--brand-500); background:var(--brand-50); }
+        .action-option .ao-icon { font-size:20px; margin-bottom:4px; }
+        .action-option .ao-label { font-size:13px; font-weight:600; }
+        .action-option .ao-desc { font-size:11px; color:var(--text-secondary); margin-top:2px; }
+        .remarks-input { width:100%; padding:12px; border:1px solid var(--border); border-radius:8px; font-size:13px; font-family:inherit; resize:vertical; min-height:80px; background:var(--bg-secondary); color:var(--text-primary); }
+        .remarks-input:focus { outline:none; border-color:var(--brand-500); }
+        .save-btn { padding:10px 24px; border:none; border-radius:8px; background:var(--brand-500); color:#fff; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; margin-top:12px; }
+        .save-btn:hover { background:var(--brand-600); }
+        .empty-msg { padding:40px; text-align:center; color:var(--text-tertiary); font-size:13px; }
+        .event-severity-label { font-size:10px; font-weight:600; padding:2px 6px; border-radius:3px; text-transform:uppercase; }
+        .sev-low-label { background:rgba(34,197,94,.1); color:#16a34a; }
+        .sev-medium-label { background:rgba(234,179,8,.1); color:#ca8a04; }
+        .sev-high-label { background:rgba(239,68,68,.1); color:#dc2626; }
+    </style>
+</head>
+<body class="bg-primary">
+    <nav class="navbar" id="mainNav"><a href="../index.html" class="logo">AI<span>Learn</span></a><ul class="nav-links" id="navLinks"></ul></nav>
+
+    <div class="review-wrap">
+        <div class="review-header">
+            <div>
+                <a href="proctoring.html" class="back-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                    Back
+                </a>
+                <h1 style="margin-top:12px;">Proctoring Review</h1>
+                <p id="reviewSubtitle">Loading session details...</p>
+            </div>
+        </div>
+
+        <div class="info-grid" id="infoGrid"></div>
+
+        <div class="section-card">
+            <div class="section-head"><h2>Camera Events</h2></div>
+            <div class="events-list" id="eventsList">
+                <div class="empty-msg">Loading events...</div>
+            </div>
+        </div>
+
+        <div class="action-section" id="actionSection">
+            <h3>Mentor Action</h3>
+            <div class="action-grid">
+                <div class="action-option" onclick="selectAction(this,'cleared')">
+                    <div class="ao-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+                    <div class="ao-label">Cleared</div>
+                    <div class="ao-desc">No issues found</div>
+                </div>
+                <div class="action-option" onclick="selectAction(this,'warning')">
+                    <div class="ao-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+                    <div class="ao-label">Warning</div>
+                    <div class="ao-desc">Minor issues noted</div>
+                </div>
+                <div class="action-option" onclick="selectAction(this,'flagged')">
+                    <div class="ao-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>
+                    <div class="ao-label">Flagged</div>
+                    <div class="ao-desc">Suspicious activity</div>
+                </div>
+                <div class="action-option" onclick="selectAction(this,' disqualified')">
+                    <div class="ao-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+                    <div class="ao-label">Disqualified</div>
+                    <div class="ao-desc">Major violation</div>
+                </div>
+            </div>
+            <textarea class="remarks-input" id="remarksInput" placeholder="Add mentor remarks (optional)..."></textarea>
+            <button class="save-btn" onclick="saveAction()">Save Action</button>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script>
+    let sessionId = null;
+    let selectedAction = "pending";
+    let sessionData = null;
+
+    document.addEventListener("DOMContentLoaded", function() {
+        if (typeof checkAuth === "function") checkAuth();
+        sessionId = new URLSearchParams(window.location.search).get("session_id");
+        if (sessionId) {
+            loadSession();
+            loadEvents();
+            loadReport();
+        }
+    });
+
+    async function loadSession() {
+        try {
+            const r = await fetch(`/api/proctoring/all-sessions`, {credentials:"include"});
+            const j = await r.json();
+            if (j.success) {
+                sessionData = j.data.find(s => s.session_id == sessionId);
+                if (sessionData) {
+                    document.getElementById("reviewSubtitle").textContent = `${sessionData.student_name || 'Unknown'} — ${sessionData.quiz_title || 'Unknown'}`;
+                    document.getElementById("infoGrid").innerHTML = `
+                        <div class="info-card"><div class="ic-label">Student</div><div class="ic-value">${sessionData.student_name || 'Unknown'}</div></div>
+                        <div class="info-card"><div class="ic-label">Quiz</div><div class="ic-value">${sessionData.quiz_title || '—'}</div></div>
+                        <div class="info-card"><div class="ic-label">Status</div><div class="ic-value">${sessionData.status}</div></div>
+                        <div class="info-card"><div class="ic-label">Risk Level</div><div class="ic-value"><span class="risk-badge risk-${sessionData.risk_level}">${sessionData.risk_level.toUpperCase()}</span></div></div>
+                        <div class="info-card"><div class="ic-label">Total Events</div><div class="ic-value">${sessionData.total_events}</div></div>
+                        <div class="info-card"><div class="ic-label">Face Verified</div><div class="ic-value">${sessionData.face_verified ? 'Yes' : 'No'}</div></div>
+                        <div class="info-card"><div class="ic-label">ID Verified</div><div class="ic-value">${sessionData.id_verified ? 'Yes' : 'No'}</div></div>
+                        <div class="info-card"><div class="ic-label">Started</div><div class="ic-value" style="font-size:13px;">${sessionData.started_at || ''}</div></div>
+                    `;
+                }
+            }
+        } catch(e) {}
+    }
+
+    async function loadEvents() {
+        try {
+            const r = await fetch(`/api/proctoring/events/${sessionId}`, {credentials:"include"});
+            const j = await r.json();
+            const el = document.getElementById("eventsList");
+            if (j.success && j.data.length) {
+                const icons = {
+                    face_missing: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="2" y1="2" x2="22" y2="22"/></svg>',
+                    multiple_faces: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>',
+                    camera_off: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M21 21H3a2 2 0 01-2-2V8a2 2 0 012-2h3m3-3h6l2 3h4a2 2 0 012 2v9.34"/></svg>',
+                    mobile_detected: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>',
+                    looking_away: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+                    student_left: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>',
+                };
+                el.innerHTML = j.data.map(e => `
+                    <div class="event-item">
+                        <div class="event-icon sev-${e.severity}">${icons[e.event_type] || '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'}</div>
+                        <div class="event-info">
+                            <div class="event-type">${e.event_type.replace(/_/g, ' ')} <span class="event-severity-label sev-${e.severity}-label">${e.severity}</span></div>
+                            <div class="event-desc">${e.description}</div>
+                            <div class="event-meta">
+                                <span>${e.created_at}</span>
+                                <span>Confidence: ${(e.confidence_score * 100).toFixed(0)}%</span>
+                                <span>Status: ${e.status}</span>
+                            </div>
+                        </div>
+                        <div class="event-actions">
+                            ${e.screenshot_url ? `<img src="${e.screenshot_url}" class="screenshot-thumb" alt="Screenshot">` : ''}
+                            <button class="ev-btn ${e.status === 'cleared' ? 'cleared' : ''}" onclick="clearEvent(${e.event_id}, this)">${e.status === 'cleared' ? 'Cleared' : 'Clear'}</button>
+                        </div>
+                    </div>
+                `).join("");
+            } else {
+                el.innerHTML = '<div class="empty-msg">No events recorded for this session.</div>';
+            }
+        } catch(e) {}
+    }
+
+    async function clearEvent(eventId, btn) {
+        try {
+            await fetch(`/api/proctoring/event/${eventId}/status`, {
+                method:"POST", headers:{"Content-Type":"application/json"}, credentials:"include",
+                body: JSON.stringify({status:"cleared"})
+            });
+            btn.textContent = "Cleared";
+            btn.classList.add("cleared");
+        } catch(e) {}
+    }
+
+    async function loadReport() {
+        try {
+            const r = await fetch(`/api/proctoring/report/${sessionId}`, {credentials:"include"});
+            const j = await r.json();
+            if (j.success && j.data && j.data.final_action && j.data.final_action !== "pending") {
+                selectedAction = j.data.final_action;
+                document.querySelectorAll(".action-option").forEach(o => {
+                    o.classList.toggle("selected", o.getAttribute("onclick").includes(selectedAction));
+                });
+                document.getElementById("remarksInput").value = j.data.mentor_remarks || "";
+            }
+        } catch(e) {}
+    }
+
+    function selectAction(el, action) {
+        document.querySelectorAll(".action-option").forEach(o => o.classList.remove("selected"));
+        el.classList.add("selected");
+        selectedAction = action;
+    }
+
+    async function saveAction() {
+        const remarks = document.getElementById("remarksInput").value.trim();
+        try {
+            await fetch(`/api/proctoring/report/${sessionId}/action`, {
+                method:"POST", headers:{"Content-Type":"application/json"}, credentials:"include",
+                body: JSON.stringify({action: selectedAction, remarks})
+            });
+            alert("Action saved successfully");
+        } catch(e) { alert("Error saving action"); }
+    }
+    </script>
+</body>
+</html>

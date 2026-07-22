@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interventions — AILearn</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .page { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+        .page-header { padding: 40px 0 24px; }
+        .page-header h1 { font-size: 1.8rem; font-weight: 700; margin: 0 0 4px; }
+        .page-header .sub { color: var(--text-secondary); font-size: 0.9rem; }
+
+        .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 28px; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
+        .stat-card .num { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); }
+        .stat-card .lbl { font-size: 0.75rem; color: var(--text-tertiary); margin-top: 2px; }
+
+        .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .section-card h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 16px; color: var(--text-primary); }
+
+        .tabs { display: flex; gap: 4px; margin-bottom: 20px; }
+        .tab { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+        .tab.active { background: var(--brand-50, #eef2ff); color: var(--brand-600, #4f46e5); border-color: var(--brand-200, #c7d2fe); font-weight: 600; }
+        .tab:hover { background: var(--bg-secondary); }
+
+        .student-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 12px; transition: box-shadow 0.15s; }
+        .student-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+        .student-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .student-name { font-weight: 600; font-size: 0.95rem; color: var(--text-primary); }
+        .student-code { font-size: 0.78rem; color: var(--text-tertiary); }
+        .student-meta { display: flex; gap: 16px; font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 10px; }
+        .student-reasons { list-style: none; padding: 0; margin: 0 0 12px; }
+        .student-reasons li { font-size: 0.82rem; color: var(--text-secondary); padding: 3px 0; display: flex; align-items: center; gap: 6px; }
+        .student-reasons li::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--red-400, #f87171); flex-shrink: 0; }
+        .weak-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+        .weak-tag { padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; background: rgba(239,68,68,0.08); color: #ef4444; }
+
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 500; border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary); cursor: pointer; transition: all 0.15s; }
+        .btn:hover { background: var(--bg-secondary); }
+        .btn-primary { background: var(--brand-500, #6366f1); color: #fff; border-color: var(--brand-500); }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-sm { padding: 5px 10px; font-size: 0.75rem; }
+
+        .priority-badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; }
+        .priority-High { background: rgba(239,68,68,0.1); color: #ef4444; }
+        .priority-Medium { background: rgba(234,179,8,0.1); color: #eab308; }
+        .priority-Low { background: rgba(34,197,94,0.1); color: #22c55e; }
+
+        .status-badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; }
+        .status-Pending { background: rgba(234,179,8,0.1); color: #eab308; }
+        .status-InProgress { background: rgba(59,130,246,0.1); color: #3b82f6; }
+        .status-Completed { background: rgba(34,197,94,0.1); color: #22c55e; }
+        .status-Cancelled { background: rgba(107,114,128,0.1); color: #6b7280; }
+
+        .type-badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; background: var(--bg-tertiary); color: var(--text-secondary); }
+
+        .intervention-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+        .intervention-row:last-child { border-bottom: none; }
+        .intervention-info { flex: 1; }
+        .intervention-info .title { font-weight: 600; font-size: 0.88rem; color: var(--text-primary); }
+        .intervention-info .meta { font-size: 0.78rem; color: var(--text-tertiary); margin-top: 2px; }
+        .intervention-actions { display: flex; gap: 6px; }
+
+        .empty-msg { color: var(--text-tertiary); font-size: 0.9rem; text-align: center; padding: 32px 0; }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
+        .modal-overlay.show { display: flex; }
+        .modal-box { background: var(--surface); border-radius: 12px; padding: 28px; max-width: 480px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .modal-box h3 { font-size: 1.1rem; font-weight: 600; margin: 0 0 16px; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); margin-bottom: 4px; }
+        .form-group select, .form-group input, .form-group textarea {
+            width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
+            font-size: 0.85rem; background: var(--bg-primary); color: var(--text-primary);
+        }
+        .form-group textarea { resize: vertical; min-height: 60px; }
+        .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+
+        @media (max-width: 768px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .student-top { flex-direction: column; align-items: flex-start; gap: 4px; }
+        }
+    </style>
+</head>
+<body class="bg-primary">
+    <nav class="navbar" id="mainNav"><a href="../index.html" class="logo">AI<span>Learn</span></a><ul class="nav-links" id="navLinks"></ul></nav>
+
+    <div class="page">
+        <div class="page-header">
+            <h1>Intervention Management</h1>
+            <p class="sub">Auto-detect struggling students and provide timely support</p>
+        </div>
+
+        <div class="stats-row" id="statsRow"></div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('struggling')">Struggling Students</button>
+            <button class="tab" onclick="showTab('interventions')">All Interventions</button>
+        </div>
+
+        <div id="tab-struggling">
+            <div id="strugglingList"></div>
+        </div>
+
+        <div id="tab-interventions" style="display:none;">
+            <div class="section-card">
+                <div id="interventionsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="createModal">
+        <div class="modal-box">
+            <h3>Create Intervention</h3>
+            <input type="hidden" id="modalStudentId">
+            <div class="form-group">
+                <label>Student</label>
+                <input type="text" id="modalStudentName" readonly>
+            </div>
+            <div class="form-group">
+                <label>Intervention Type</label>
+                <select id="modalType">
+                    <option value="Quiz">Practice Quiz</option>
+                    <option value="Revision">Revision Plan</option>
+                    <option value="Material">Study Material</option>
+                    <option value="Reminder">Reminder</option>
+                    <option value="Meeting">Meeting</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Topic</label>
+                <input type="text" id="modalTopic" placeholder="e.g. OOP, Database Design">
+            </div>
+            <div class="form-group">
+                <label>Reason</label>
+                <textarea id="modalReason" placeholder="Why this intervention is needed..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Priority</label>
+                <select id="modalPriority">
+                    <option value="High">High</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="Low">Low</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Deadline</label>
+                <input type="date" id="modalDeadline">
+            </div>
+            <div class="form-actions">
+                <button class="btn" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="submitIntervention()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script>
+    function showTab(name) {
+        document.querySelectorAll('.tab').forEach((t, i) => {
+            t.classList.toggle('active', (name === 'struggling' && i === 0) || (name === 'interventions' && i === 1));
+        });
+        document.getElementById('tab-struggling').style.display = name === 'struggling' ? '' : 'none';
+        document.getElementById('tab-interventions').style.display = name === 'interventions' ? '' : 'none';
+    }
+
+    function renderStats(d) {
+        const items = [
+            { num: d.total, lbl: 'Total Interventions' },
+            { num: d.pending, lbl: 'Pending' },
+            { num: d.in_progress, lbl: 'In Progress' },
+            { num: d.completed, lbl: 'Completed' },
+            { num: d.high_priority, lbl: 'High Priority' },
+        ];
+        document.getElementById('statsRow').innerHTML = items.map(it => `
+            <div class="stat-card"><div class="num">${it.num}</div><div class="lbl">${it.lbl}</div></div>
+        `).join('');
+    }
+
+    function renderStruggling(students) {
+        if (!students || !students.length) {
+            document.getElementById('strugglingList').innerHTML = '<div class="section-card"><p class="empty-msg">No struggling students detected. Great class performance!</p></div>';
+            return;
+        }
+        document.getElementById('strugglingList').innerHTML = students.map(s => `
+            <div class="student-card">
+                <div class="student-top">
+                    <div>
+                        <div class="student-name">${s.name}</div>
+                        <div class="student-code">${s.student_code} · ${s.email}</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span class="priority-badge priority-${s.priority}">${s.priority}</span>
+                        <span style="font-size:1.1rem;font-weight:700;color:${s.avg_accuracy < 40 ? '#ef4444' : s.avg_accuracy < 60 ? '#eab308' : '#22c55e'}">${s.avg_accuracy}%</span>
+                    </div>
+                </div>
+                <div class="student-meta">
+                    <span>${s.quizzes_taken} quizzes taken</span>
+                </div>
+                <ul class="student-reasons">${s.reasons.map(r => `<li>${r}</li>`).join('')}</ul>
+                ${s.weak_topics.length ? `<div class="weak-tags">${s.weak_topics.map(t => `<span class="weak-tag">${t}</span>`).join('')}</div>` : ''}
+                <button class="btn btn-primary btn-sm" onclick="openCreate(${s.student_id}, '${s.name.replace(/'/g, "\\'")}')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Create Intervention
+                </button>
+            </div>
+        `).join('');
+    }
+
+    function renderInterventions(items) {
+        if (!items || !items.length) {
+            document.getElementById('interventionsList').innerHTML = '<p class="empty-msg">No interventions created yet</p>';
+            return;
+        }
+        document.getElementById('interventionsList').innerHTML = items.map(i => `
+            <div class="intervention-row">
+                <div class="intervention-info">
+                    <div class="title">${i.student_name} — ${i.topic || 'General'}</div>
+                    <div class="meta">
+                        <span class="type-badge">${i.intervention_type}</span>
+                        <span class="priority-badge priority-${i.priority}">${i.priority}</span>
+                        <span class="status-badge status-${i.status.replace(' ', '')}">${i.status}</span>
+                        ${i.deadline ? `<span style="margin-left:8px;">Due: ${i.deadline}</span>` : ''}
+                    </div>
+                    ${i.reason ? `<div class="meta" style="margin-top:4px;">${i.reason}</div>` : ''}
+                </div>
+                <div class="intervention-actions">
+                    ${i.status === 'Pending' ? `<button class="btn btn-sm" onclick="updateInt(${i.intervention_id}, 'In Progress')">Start</button>` : ''}
+                    ${i.status === 'In Progress' ? `<button class="btn btn-sm btn-primary" onclick="updateInt(${i.intervention_id}, 'Completed')">Complete</button>` : ''}
+                    ${i.status !== 'Completed' && i.status !== 'Cancelled' ? `<button class="btn btn-sm" onclick="updateInt(${i.intervention_id}, 'Cancelled')">Cancel</button>` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function openCreate(studentId, name) {
+        document.getElementById('modalStudentId').value = studentId;
+        document.getElementById('modalStudentName').value = name;
+        document.getElementById('modalTopic').value = '';
+        document.getElementById('modalReason').value = '';
+        document.getElementById('modalDeadline').value = '';
+        document.getElementById('createModal').classList.add('show');
+    }
+
+    function closeModal() {
+        document.getElementById('createModal').classList.remove('show');
+    }
+
+    async function submitIntervention() {
+        const body = {
+            student_id: parseInt(document.getElementById('modalStudentId').value),
+            intervention_type: document.getElementById('modalType').value,
+            topic: document.getElementById('modalTopic').value,
+            reason: document.getElementById('modalReason').value,
+            priority: document.getElementById('modalPriority').value,
+            deadline: document.getElementById('modalDeadline').value,
+        };
+        const r = await fetch('/api/interventions/create', {
+            method: 'POST', headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify(body)
+        });
+        const j = await r.json();
+        if (j.success) {
+            closeModal();
+            loadAll();
+        }
+    }
+
+    async function updateInt(id, status) {
+        await fetch('/api/interventions/update', {
+            method: 'POST', headers: {'Content-Type':'application/json'}, credentials: 'include',
+            body: JSON.stringify({ intervention_id: id, status })
+        });
+        loadAll();
+    }
+
+    async function loadAll() {
+        try {
+            const [struggling, interventions, stats] = await Promise.all([
+                fetch('/api/interventions/struggling-students', {credentials:'include'}).then(r=>r.json()),
+                fetch('/api/interventions/list', {credentials:'include'}).then(r=>r.json()),
+                fetch('/api/interventions/stats', {credentials:'include'}).then(r=>r.json()),
+            ]);
+            if (stats.success) renderStats(stats.data);
+            if (struggling.success) renderStruggling(struggling.data);
+            if (interventions.success) renderInterventions(interventions.data);
+        } catch(e) { console.error('Load failed:', e); }
+    }
+
+    loadAll();
+    </script>
+</body>
+</html>

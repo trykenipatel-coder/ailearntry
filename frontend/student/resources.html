@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coding Resource Explorer</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .resources-header { margin-bottom:32px; }
+        .resources-header h1 { font-size:28px; font-weight:800; margin-bottom:6px; }
+        .resources-header p { color:var(--neutral-500); font-size:14px; }
+
+        .search-section { background:var(--surface); border:1px solid var(--neutral-200); border-radius:var(--radius-xl); padding:32px; margin-bottom:32px; }
+        .search-box { display:flex; gap:12px; }
+        .search-input { flex:1; padding:14px 18px; border:1px solid var(--neutral-200); border-radius:var(--radius-lg); font-size:15px; background:var(--neutral-50); transition:border .2s; }
+        .search-input:focus { outline:none; border-color:var(--brand-500); box-shadow:0 0 0 3px var(--brand-100); }
+        .search-btn { padding:14px 32px; background:var(--brand-500); color:#fff; border:none; border-radius:var(--radius-lg); font-size:15px; font-weight:600; cursor:pointer; transition:all .2s; white-space:nowrap; }
+        .search-btn:hover { background:var(--brand-600); transform:translateY(-1px); }
+
+        .content-grid { display:grid; grid-template-columns:1fr 340px; gap:24px; }
+        @media(max-width:1024px){ .content-grid { grid-template-columns:1fr; } }
+
+        .section-card { background:var(--surface); border:1px solid var(--neutral-200); border-radius:var(--radius-xl); padding:24px; margin-bottom:24px; }
+        .section-title { font-size:16px; font-weight:700; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+        .section-title svg { width:18px; height:18px; }
+
+        .popular-topics { display:flex; flex-wrap:wrap; gap:8px; }
+        .topic-chip { padding:8px 16px; background:var(--neutral-50); border:1px solid var(--neutral-200); border-radius:var(--radius-lg); font-size:13px; font-weight:500; cursor:pointer; transition:all .2s; }
+        .topic-chip:hover { background:var(--brand-50); border-color:var(--brand-300); color:var(--brand-700); }
+
+        .categories-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        .category-card { padding:14px; background:var(--neutral-50); border:1px solid var(--neutral-200); border-radius:var(--radius-lg); cursor:pointer; transition:all .2s; text-align:center; }
+        .category-card:hover { background:var(--brand-50); border-color:var(--brand-300); transform:translateY(-2px); }
+        .category-icon { font-size:24px; margin-bottom:6px; }
+        .category-name { font-size:13px; font-weight:600; }
+
+        .rec-list { display:flex; flex-direction:column; gap:12px; }
+        .rec-item { padding:16px; background:var(--neutral-50); border:1px solid var(--neutral-200); border-radius:var(--radius-lg); transition:all .2s; }
+        .rec-item:hover { border-color:var(--brand-300); box-shadow:var(--shadow-sm); }
+        .rec-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; }
+        .rec-topic { font-size:14px; font-weight:700; }
+        .rec-mastery { font-size:11px; padding:2px 8px; background:var(--warning-100); color:var(--warning-700); border-radius:var(--radius-full); }
+        .rec-meta { font-size:12px; color:var(--neutral-500); margin-bottom:10px; display:flex; gap:12px; flex-wrap:wrap; }
+        .rec-open { padding:8px 16px; background:var(--brand-500); color:#fff; border:none; border-radius:var(--radius-md); font-size:12px; font-weight:600; cursor:pointer; transition:all .2s; }
+        .rec-open:hover { background:var(--brand-600); }
+
+        .featured-list { display:flex; flex-direction:column; gap:10px; }
+        .featured-item { display:flex; align-items:center; gap:12px; padding:12px; background:var(--neutral-50); border:1px solid var(--neutral-200); border-radius:var(--radius-lg); cursor:pointer; transition:all .2s; }
+        .featured-item:hover { border-color:var(--brand-300); transform:translateX(4px); }
+        .featured-badge { width:36px; height:36px; background:linear-gradient(135deg, var(--warning-400), var(--error-400)); border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; color:#fff; font-size:14px; flex-shrink:0; }
+        .featured-info { flex:1; min-width:0; }
+        .featured-title { font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .featured-sub { font-size:11px; color:var(--neutral-500); }
+
+        .recent-list { display:flex; flex-direction:column; gap:8px; }
+        .recent-item { display:flex; justify-content:space-between; align-items:center; padding:10px; background:var(--neutral-50); border-radius:var(--radius-md); }
+        .recent-name { font-size:13px; font-weight:500; }
+        .recent-time { font-size:11px; color:var(--neutral-500); }
+
+        .fav-list { display:flex; flex-direction:column; gap:8px; }
+        .fav-item { display:flex; justify-content:space-between; align-items:center; padding:12px; background:var(--neutral-50); border:1px solid var(--neutral-200); border-radius:var(--radius-lg); }
+        .fav-info { display:flex; align-items:center; gap:10px; }
+        .fav-star { color:var(--warning-500); font-size:14px; }
+        .fav-name { font-size:13px; font-weight:600; }
+        .fav-platform { font-size:11px; color:var(--neutral-500); }
+        .fav-remove { background:none; border:none; color:var(--neutral-400); cursor:pointer; font-size:14px; padding:4px; transition:color .2s; }
+        .fav-remove:hover { color:var(--error-500); }
+
+        .empty-msg { text-align:center; padding:24px; color:var(--neutral-400); font-size:13px; }
+
+        .search-results { margin-top:24px; }
+        .results-title { font-size:20px; font-weight:700; margin-bottom:16px; }
+        .results-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:16px; }
+        .result-card { padding:20px; background:var(--surface); border:1px solid var(--neutral-200); border-radius:var(--radius-xl); transition:all .2s; }
+        .result-card:hover { border-color:var(--brand-300); box-shadow:var(--shadow-md); transform:translateY(-2px); }
+        .result-platform { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+        .result-dot { width:10px; height:10px; border-radius:50%; }
+        .result-platform-name { font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+        .result-title { font-size:15px; font-weight:700; margin-bottom:10px; }
+        .result-meta { display:flex; gap:16px; margin-bottom:14px; }
+        .result-meta-item { display:flex; align-items:center; gap:5px; font-size:12px; color:var(--neutral-500); }
+        .diff-badge { padding:3px 10px; border-radius:var(--radius-full); font-size:11px; font-weight:600; }
+        .diff-easy { background:var(--success-100); color:var(--success-700); }
+        .diff-medium { background:var(--warning-100); color:var(--warning-700); }
+        .diff-hard { background:var(--error-100); color:var(--error-700); }
+        .result-actions { display:flex; gap:8px; }
+        .open-btn { flex:1; padding:10px; background:var(--brand-500); color:#fff; border:none; border-radius:var(--radius-md); font-size:13px; font-weight:600; cursor:pointer; transition:all .2s; text-align:center; text-decoration:none; display:block; }
+        .open-btn:hover { background:var(--brand-600); }
+        .fav-btn { padding:10px 14px; background:var(--neutral-100); border:1px solid var(--neutral-200); border-radius:var(--radius-md); cursor:pointer; font-size:14px; transition:all .2s; color:var(--neutral-500); }
+        .fav-btn:hover { color:var(--warning-500); }
+        .fav-btn.active { color:var(--warning-500); background:var(--warning-50); border-color:var(--warning-200); }
+
+        .platforms-section { margin-top:24px; }
+        .platforms-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:10px; }
+        .platform-chip { display:flex; align-items:center; gap:8px; padding:12px 16px; background:var(--neutral-50); border:1px solid var(--neutral-200); border-radius:var(--radius-lg); font-size:13px; font-weight:500; cursor:pointer; transition:all .2s; }
+        .platform-chip:hover { border-color:var(--brand-300); transform:translateY(-2px); }
+        .platform-dot { width:8px; height:8px; border-radius:50%; }
+
+        .loading-bar { height:3px; background:var(--neutral-100); border-radius:2px; overflow:hidden; margin-top:12px; display:none; }
+        .loading-bar.active { display:block; }
+        .loading-bar::after { content:''; display:block; height:100%; width:30%; background:var(--brand-500); border-radius:2px; animation:loadSlide 1s ease-in-out infinite; }
+        @keyframes loadSlide { 0%{margin-left:0} 50%{margin-left:70%} 100%{margin-left:0} }
+    </style>
+</head>
+<body class="dark-body">
+    <nav id="mainNav" class="navbar dark-nav">
+        <a href="../student/dashboard.html" class="logo">AI<span>Learn</span></a>
+        <ul class="nav-links dark-nav-links" id="navLinks"></ul>
+    </nav>
+
+    <main class="w container dark-container">
+        <div class="resources-header">
+            <h1>Coding Resource Explorer</h1>
+            <p>Search topics, discover platforms, and access trusted coding resources in one place.</p>
+        </div>
+
+        <div class="search-section">
+            <div class="search-box">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search any programming topic (e.g. Binary Tree, Dynamic Programming, SQL)...">
+                <button class="search-btn" id="searchBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:6px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    Search
+                </button>
+            </div>
+            <div class="loading-bar" id="searchLoading"></div>
+        </div>
+
+        <div id="searchResults" class="search-results" style="display:none"></div>
+
+        <div class="content-grid">
+            <div class="main-col">
+                <div class="section-card">
+                    <div class="section-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--brand-500)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        Popular Topics
+                    </div>
+                    <div class="popular-topics" id="popularTopics"></div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--brand-500)" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                        Categories
+                    </div>
+                    <div class="categories-grid" id="categoriesGrid"></div>
+                </div>
+
+                <div class="section-card" id="recommendedSection" style="display:none">
+                    <div class="section-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--brand-500)" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                        Recommended Resources
+                    </div>
+                    <div class="rec-list" id="recList"></div>
+                </div>
+
+                <div class="section-card platforms-section">
+                    <div class="section-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--brand-500)" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                        Supported Platforms
+                    </div>
+                    <div class="platforms-grid" id="platformsGrid"></div>
+                </div>
+            </div>
+
+            <div class="side-col">
+                <div class="section-card">
+                    <div class="section-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--warning-500)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        Featured Resources
+                    </div>
+                    <div class="featured-list" id="featuredList"></div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--success-500)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        Recently Opened
+                    </div>
+                    <div class="recent-list" id="recentList">
+                        <div class="empty-msg">No recent activity</div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--error-500)" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                        My Favorites
+                    </div>
+                    <div class="fav-list" id="favList">
+                        <div class="empty-msg">No favorites yet</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/auth.js"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        if (typeof initDarkMode === "function") initDarkMode();
+        if (typeof checkAuth === "function") checkAuth();
+        loadPopularTopics();
+        loadCategories();
+        loadFeatured();
+        loadRecent();
+        loadFavorites();
+        loadRecommendations();
+        loadPlatforms();
+
+        document.getElementById("searchBtn").addEventListener("click", doSearch);
+        document.getElementById("searchInput").addEventListener("keypress", function(e) { if(e.key==="Enter") doSearch(); });
+    });
+
+    const API = "/api/resources";
+
+    async function doSearch() {
+        const topic = document.getElementById("searchInput").value.trim();
+        if (!topic) return;
+        document.getElementById("searchLoading").classList.add("active");
+        document.getElementById("searchResults").style.display = "none";
+        try {
+            const res = await fetch(`${API}/search?topic=${encodeURIComponent(topic)}`);
+            const data = await res.json();
+            document.getElementById("searchLoading").classList.remove("active");
+            if (data.success) {
+                showResults(data.data, topic);
+                loadRecent();
+            }
+        } catch(e) {
+            document.getElementById("searchLoading").classList.remove("active");
+        }
+    }
+
+    function showResults(results, topic) {
+        const c = document.getElementById("searchResults");
+        c.style.display = "block";
+        c.innerHTML = `
+            <div class="section-card">
+                <div class="results-title">Search Results — ${topic}</div>
+                <div class="results-grid">${results.map(r => `
+                    <div class="result-card">
+                        <div class="result-platform">
+                            <div class="result-dot" style="background:${r.color}"></div>
+                            <span class="result-platform-name">${r.platform}</span>
+                        </div>
+                        <div class="result-title">${r.title}</div>
+                        <div class="result-meta">
+                            <span class="diff-badge diff-${r.difficulty.toLowerCase()}">${r.difficulty}</span>
+                            <span class="result-meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                ${r.estimated_time}
+                            </span>
+                        </div>
+                        <div class="result-actions">
+                            <a href="${r.url}" target="_blank" rel="noopener" class="open-btn" onclick="openRes('${topic}','${r.platform}')">
+                                Open Resource
+                            </a>
+                            <button class="fav-btn" onclick="toggleFav(this,'${topic}','${r.platform}','')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                `).join("")}</div>
+            </div>
+        `;
+        c.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    async function openRes(topic, platform) {
+        fetch(`${API}/open`, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({topic, platform}) });
+    }
+
+    async function toggleFav(btn, topic, platform, category) {
+        const res = await fetch(`${API}/favorites`, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({topic, platform, category}) });
+        const data = await res.json();
+        if (data.success) {
+            btn.classList.toggle("active", data.data.favorited);
+            loadFavorites();
+        }
+    }
+
+    function loadPopularTopics() {
+        const topics = ["Arrays","Strings","Linked List","Stack","Queue","Trees","Graph","Dynamic Programming","SQL","OOP","Sorting","Recursion","Binary Search","Greedy","Backtracking"];
+        document.getElementById("popularTopics").innerHTML = topics.map(t =>
+            `<span class="topic-chip" onclick="searchTopic('${t}')">${t}</span>`
+        ).join("");
+    }
+
+    function searchTopic(t) {
+        document.getElementById("searchInput").value = t;
+        doSearch();
+    }
+
+    function loadCategories() {
+        const cats = [
+            {name:"Data Structures", icon:"&#x1F4D8;", color:"var(--brand-500)"},
+            {name:"Algorithms", icon:"&#x26A1;", color:"var(--warning-500)"},
+            {name:"Web Development", icon:"&#x1F4BB;", color:"var(--success-500)"},
+            {name:"Artificial Intelligence", icon:"&#x1F916;", color:"var(--info-500)"},
+            {name:"Database", icon:"&#x1F5C3;", color:"var(--accent-500)"},
+            {name:"Programming Languages", icon:"&#x1F40D;", color:"var(--error-500)"},
+        ];
+        document.getElementById("categoriesGrid").innerHTML = cats.map(c =>
+            `<div class="category-card" onclick="searchTopic('${c.name}')">
+                <div class="category-icon">${c.icon}</div>
+                <div class="category-name">${c.name}</div>
+            </div>`
+        ).join("");
+    }
+
+    function loadFeatured() {
+        const featured = [
+            {title:"Top 100 DSA Questions", topic:"DSA", platform:"GeeksforGeeks", difficulty:"Mixed", time:"120 min", url:"https://www.geeksforgeeks.org/must-do-coding-questions-for-product-based-companies/"},
+            {title:"SQL Interview Preparation", topic:"SQL", platform:"GeeksforGeeks", difficulty:"Medium", time:"60 min", url:"https://www.geeksforgeeks.org/sql-interview-question/"},
+            {title:"Google Coding Interview Guide", topic:"Interview", platform:"LeetCode", difficulty:"Hard", time:"90 min", url:"https://leetcode.com/explore/"},
+            {title:"System Design Basics", topic:"System Design", platform:"GeeksforGeeks", difficulty:"Medium", time:"45 min", url:"https://www.geeksforgeeks.org/system-design-tutorial/"},
+            {title:"Python Programming Roadmap", topic:"Python", platform:"GeeksforGeeks", difficulty:"Easy", time:"30 min", url:"https://www.geeksforgeeks.org/python-programming-language-tutorial/"},
+        ];
+        document.getElementById("featuredList").innerHTML = featured.map(f =>
+            `<a href="${f.url}" target="_blank" rel="noopener" class="featured-item" onclick="openRes('${f.topic}','${f.platform}')">
+                <div class="featured-badge">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </div>
+                <div class="featured-info">
+                    <div class="featured-title">${f.title}</div>
+                    <div class="featured-sub">${f.difficulty} &middot; ${f.time}</div>
+                </div>
+            </a>`
+        ).join("");
+    }
+
+    async function loadRecent() {
+        try {
+            const res = await fetch(`${API}/recent`);
+            const data = await res.json();
+            const el = document.getElementById("recentList");
+            if (data.success && data.data.length > 0) {
+                el.innerHTML = data.data.map(r =>
+                    `<div class="recent-item">
+                        <span class="recent-name">${r.topic}</span>
+                        <span class="recent-time">${r.time_ago}</span>
+                    </div>`
+                ).join("");
+            }
+        } catch(e) {}
+    }
+
+    async function loadFavorites() {
+        try {
+            const res = await fetch(`${API}/favorites`);
+            const data = await res.json();
+            const el = document.getElementById("favList");
+            if (data.success && data.data.length > 0) {
+                el.innerHTML = data.data.map(f =>
+                    `<div class="fav-item">
+                        <div class="fav-info">
+                            <span class="fav-star">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--warning-500)" stroke="var(--warning-500)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                            </span>
+                            <div>
+                                <div class="fav-name">${f.topic}</div>
+                                <div class="fav-platform">${f.platform}</div>
+                            </div>
+                        </div>
+                        <button class="fav-remove" onclick="removeFav('${f.topic}','${f.platform}')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                    </div>`
+                ).join("");
+            } else {
+                el.innerHTML = '<div class="empty-msg">No favorites yet</div>';
+            }
+        } catch(e) {}
+    }
+
+    async function removeFav(topic, platform) {
+        await fetch(`${API}/favorites`, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({topic, platform}) });
+        loadFavorites();
+    }
+
+    async function loadRecommendations() {
+        try {
+            const res = await fetch(`${API}/recommendations`);
+            const data = await res.json();
+            if (data.success && data.data.length > 0) {
+                document.getElementById("recommendedSection").style.display = "block";
+                document.getElementById("recList").innerHTML = data.data.map(r => `
+                    <div class="rec-item">
+                        <div class="rec-top">
+                            <span class="rec-topic">${r.topic}</span>
+                            <span class="rec-mastery">${r.mastery}% mastery</span>
+                        </div>
+                        <div class="rec-meta">
+                            <span>${r.platform}</span>
+                            <span>${r.difficulty}</span>
+                            <span>${r.estimated_time}</span>
+                        </div>
+                        <a href="${r.url}" target="_blank" rel="noopener" class="rec-open" onclick="openRes('${r.topic}','${r.platform}')">Open Resource</a>
+                    </div>
+                `).join("");
+            }
+        } catch(e) {}
+    }
+
+    function loadPlatforms() {
+        const platforms = [
+            {name:"GeeksforGeeks", color:"#2f8d46"},
+            {name:"LeetCode", color:"#ffa116"},
+            {name:"HackerRank", color:"#1ba94c"},
+            {name:"HackerEarth", color:"#3c78d8"},
+            {name:"Codeforces", color:"#1b68b3"},
+            {name:"CodeChef", color:"#8b4513"},
+            {name:"AtCoder", color:"#333"},
+        ];
+        document.getElementById("platformsGrid").innerHTML = platforms.map(p =>
+            `<div class="platform-chip" onclick="searchTopic('${p.name}')">
+                <div class="platform-dot" style="background:${p.color}"></div>
+                ${p.name}
+            </div>`
+        ).join("");
+    }
+    </script>
+</body>
+</html>

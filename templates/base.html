@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Learning System - {% block title %}Home{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    {% if session.role %}
+    <nav class="navbar">
+        <a href="/" class="logo">AI<span>Learn</span></a>
+        <ul class="nav-links">
+            {% if session.role == 'student' %}
+                <li><a href="/student/dashboard">Dashboard</a></li>
+                <li><a href="/student/available-quizzes">Quizzes</a></li>
+                <li><a href="/student/results">Results</a></li>
+                <li><a href="/student/performance">Performance</a></li>
+            {% elif session.role == 'mentor' %}
+                <li><a href="/mentor/dashboard">Dashboard</a></li>
+                <li><a href="/mentor/create-quiz">Create Quiz</a></li>
+                <li><a href="/mentor/ai-quiz">AI Quiz</a></li>
+                <li><a href="/mentor/analytics">Analytics</a></li>
+            {% elif session.role == 'admin' %}
+                <li><a href="/admin/dashboard">Dashboard</a></li>
+                <li><a href="/admin/manage-students">Students</a></li>
+                <li><a href="/admin/manage-mentors">Mentors</a></li>
+            {% endif %}
+            <li><button class="btn-logout" onclick="logout()">Logout</button></li>
+        </ul>
+    </nav>
+    {% endif %}
+
+    <main class="container dashboard">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="/static/js/auth.js"></script>
+    <script>
+        async function logout() {
+            await apiRequest('/api/auth/logout', 'POST');
+            window.location.href = '/login';
+        }
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

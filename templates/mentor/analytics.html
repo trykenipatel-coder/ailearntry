@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Mentor Analytics{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Mentor Analytics</h1>
+    <p>Comprehensive analytics on student performance and quiz effectiveness.</p>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <div class="card-header">Topic-wise Performance</div>
+        <div id="topic-performance">
+            <div class="loading"><div class="spinner"></div></div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">Weekly Activity</div>
+        <div id="weekly-chart">
+            <div class="loading"><div class="spinner"></div></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/mentor.js"></script>
+<script>loadAnalytics();</script>
+{% endblock %}

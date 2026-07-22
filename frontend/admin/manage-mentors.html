@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Mentors - AI Learning System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar" id="mainNav">
+        <a href="../index.html" class="logo">AI<span>Learn</span></a>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="manage-students.html">Students</a></li>
+            <li><a href="manage-mentors.html">Mentors</a></li>
+            <li><a href="materials.html">Materials</a></li>
+            <li><a href="quizzes.html">Quizzes</a></li>
+        </ul>
+    </nav>
+
+    <main class="container dashboard">
+        <div class="dashboard-header">
+            <h1>Manage Mentors</h1>
+            <p>Approve, suspend, and manage all registered mentors.</p>
+        </div>
+
+        <div id="mentor-analytics-area" style="margin-bottom:24px"></div>
+
+        <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+                <div style="position:relative;flex:1;max-width:360px">
+                    <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--neutral-400)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+                    <input type="text" id="search-input" placeholder="Search mentors by name, email, or subject..."
+                        style="width:100%;padding:10px 14px 10px 36px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font);font-size:0.8125rem;outline:none;background:var(--surface)"
+                        oninput="filterMentors()">
+                </div>
+                <div style="display:flex;gap:8px;align-items:center">
+                    <select id="status-filter" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font);font-size:0.8125rem;background:var(--surface)" onchange="filterMentors()">
+                        <option value="all">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="active">Active</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="suspended">Suspended</option>
+                    </select>
+                    <span style="font-size:0.75rem;color:var(--neutral-400)">Total: <strong id="mentor-count" style="color:var(--neutral-700)">0</strong></span>
+                </div>
+            </div>
+            <div class="table-container">
+                <table id="mentors-table">
+                    <thead>
+                        <tr>
+                            <th style="width:40px">#</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Quizzes</th>
+                            <th style="width:200px">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody><tr><td colspan="7" style="text-align:center;padding:32px;color:var(--neutral-400)">Loading mentors...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Mentor Analytics Modal -->
+        <div id="mentor-analytics-modal" class="warning-overlay hidden">
+            <div class="warning-modal" style="max-width:600px;text-align:left;padding:32px;max-height:90vh;overflow-y:auto">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+                    <h2 id="analytics-modal-title" style="margin:0">Mentor Analytics</h2>
+                    <button class="btn btn-ghost btn-sm" onclick="closeMentorAnalytics()">✕</button>
+                </div>
+                <div id="analytics-modal-body">
+                    <div class="loading"><div class="spinner"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Mentor Modal -->
+        <div id="edit-mentor-modal" class="warning-overlay hidden">
+            <div class="warning-modal" style="max-width:440px;text-align:left;padding:32px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+                    <h2 style="margin:0">Edit Mentor</h2>
+                    <button class="btn btn-ghost btn-sm" onclick="closeEditMentor()">✕</button>
+                </div>
+                <form id="edit-mentor-form">
+                    <input type="hidden" id="edit-mentor-id">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" id="edit-mentor-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="edit-mentor-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Subject Specialization</label>
+                        <input type="text" id="edit-mentor-subject">
+                    </div>
+                    <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:24px">
+                        <button type="button" class="btn btn-secondary" onclick="closeEditMentor()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/admin.js"></script>
+    <script>loadMentors(); loadMentorAnalyticsSummary();</script>
+</body>
+</html>

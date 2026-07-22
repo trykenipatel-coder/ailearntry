@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Materials - AI Learning System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .sm-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px }
+        .sm-card { border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;background:var(--surface);transition:all .3s }
+        .sm-card:hover { box-shadow:0 4px 24px rgba(0,0,0,0.04) }
+        .sm-card .icon { font-size:2rem;margin-bottom:8px }
+        .sm-card h3 { font-size:0.95rem;margin-bottom:4px }
+        .sm-card p { font-size:0.78rem;color:var(--text-light);margin-bottom:8px;line-height:1.5 }
+        .sm-card .meta { font-size:0.7rem;color:var(--neutral-400);display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px }
+        .sm-card .meta span { background:var(--neutral-50);padding:2px 8px;border-radius:4px }
+        .sm-toolbar { display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center }
+        .sm-toolbar select { padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:0.8rem;background:var(--surface);min-width:130px }
+        .sm-toolbar input { flex:1;min-width:200px;padding:10px 16px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:0.85rem }
+        .preview-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:40px }
+        .preview-overlay .preview-box { background:var(--surface);border-radius:var(--radius-lg);max-width:90vw;max-height:85vh;width:100%;overflow:hidden;display:flex;flex-direction:column;animation:slideUp 0.25s var(--ease) }
+        .preview-overlay .preview-header { display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border-subtle) }
+        .preview-overlay .preview-header h3 { font-size:1rem;margin:0 }
+        .preview-overlay .preview-body { flex:1;overflow:auto;padding:20px;text-align:center }
+        .preview-overlay .preview-body img,.preview-overlay .preview-body video,.preview-overlay .preview-body iframe { max-width:100%;max-height:70vh;border-radius:var(--radius) }
+        .preview-overlay .preview-body pre { text-align:left;background:var(--neutral-50);padding:20px;border-radius:var(--radius);max-height:60vh;overflow:auto;white-space:pre-wrap;font-size:0.82rem;color:var(--text-color) }
+        body.dark .sm-card { background:#1c1c1e;border-color:rgba(255,255,255,.06) }
+        body.dark .sm-card .meta span { background:rgba(255,255,255,.04);color:var(--neutral-400) }
+        body.dark .preview-overlay .preview-box { background:#1c1c1e }
+        body.dark .preview-overlay .preview-body pre { background:rgba(255,255,255,.04);color:var(--text-color) }
+    </style>
+</head>
+<body>
+    <nav class="navbar" id="mainNav">
+        <a href="../index.html" class="logo">AI<span>Learn</span></a>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="available-quizzes.html">Quizzes</a></li>
+            <li><a href="materials.html" style="color:var(--brand-600);font-weight:600">Materials</a></li>
+            <li><a href="results.html">Results</a></li>
+            <li><a href="leaderboard.html">Leaderboard</a></li>
+            <li><a href="exam-coach.html">Exam Coach</a></li>
+        </ul>
+    </nav>
+
+    <main class="container dashboard">
+        <div class="dashboard-header">
+            <h1>Study Materials</h1>
+            <p>Access notes, slides, videos, and resources shared by your mentors.</p>
+        </div>
+
+        <div class="sm-toolbar">
+            <input type="text" id="sm-search" placeholder="Search materials..." oninput="filterMaterials()">
+            <select id="filter-subject" onchange="filterMaterials()"><option value="">All Subjects</option></select>
+            <select id="filter-category" onchange="filterMaterials()"><option value="">All Categories</option></select>
+            <select id="filter-date" onchange="filterMaterials()"><option value="">All Time</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option></select>
+        </div>
+
+        <div id="materials-container"><div class="loading"><div class="spinner"></div></div></div>
+    </main>
+
+    <!-- Preview Overlay -->
+    <div id="preview-overlay" class="preview-overlay" style="display:none" onclick="if(event.target===this)closePreview()">
+        <div class="preview-box">
+            <div class="preview-header">
+                <h3 id="preview-title">Preview</h3>
+                <button class="btn btn-secondary btn-sm" onclick="closePreview()">Close</button>
+            </div>
+            <div class="preview-body" id="preview-body"></div>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/student.js"></script>
+    <script>
+        var allMaterials = [];
+
+        async function loadMaterials() {
+            var auth = await checkAuth();
+            if (!auth || auth.role !== 'student') return;
+            var r = await apiRequest('/api/student/materials');
+            if (!r.success) return;
+            allMaterials = r.data || [];
+            populateFilters();
+            renderMaterials(allMaterials);
+        }
+
+        function populateFilters() {
+            var subjects = {}, cats = {};
+            allMaterials.forEach(function(m) {
+                if (m.subject) subjects[m.subject] = true;
+                if (m.category) cats[m.category] = true;
+            });
+            var sb = document.getElementById('filter-subject');
+            Object.keys(subjects).sort().forEach(function(s) { sb.innerHTML += '<option value="' + s + '">' + s + '</option>'; });
+            var cb = document.getElementById('filter-category');
+            Object.keys(cats).sort().forEach(function(c) { cb.innerHTML += '<option value="' + c + '">' + c + '</option>'; });
+        }
+
+        function renderMaterials(list) {
+            var c = document.getElementById('materials-container');
+            if (!list.length) {
+                c.innerHTML = '<div class="card" style="text-align:center;padding:60px 40px"><svg viewBox="0 0 24 24" fill="none" stroke="var(--neutral-300)" stroke-width="1.5" style="width:48px;height:48px;margin-bottom:12px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><h2 style="margin-bottom:8px">No Materials Available</h2><p style="color:var(--text-light);font-size:0.9rem">Your mentors haven\'t shared any study materials yet.</p></div>';
+                return;
+            }
+            var h = '<div class="sm-grid">';
+            list.forEach(function(m) {
+                var isLink = m.file_type === 'link';
+                var icon = isLink ? '<svg viewBox="0 0 24 24" fill="none" stroke="var(--brand-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>' : getFileIcon(m.file_type);
+                var ext = isLink ? m.link_type.toUpperCase() : (m.file_type || '').toUpperCase();
+                var sizeText = m.file_size ? formatSize(m.file_size) : '';
+                var canPreview = !isLink && m.file_path && ['pdf','jpg','jpeg','png','webp','gif','mp4','mov','txt','csv'].indexOf(m.file_type) >= 0;
+                h += '<div class="sm-card">';
+                h += '<div class="icon">' + icon + '</div>';
+                h += '<h3>' + m.title + '</h3>';
+                h += '<div class="meta"><span>' + ext + '</span>' + (sizeText ? '<span>' + sizeText + '</span>' : '') + '<span>' + (m.subject || 'General') + '</span>' + (m.category ? '<span>' + m.category + '</span>' : '') + '</div>';
+                if (m.description) h += '<p>' + m.description + '</p>';
+                h += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px">';
+                if (canPreview) h += '<button class="btn btn-outline btn-sm" onclick="previewMaterial(' + m.material_id + ')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:middle;margin-right:4px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Preview</button>';
+                if (!isLink && m.file_path) h += '<a href="/api/student/materials/' + m.material_id + '/download" class="btn btn-primary btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download</a>';
+                if (isLink) h += '<a href="' + m.external_link + '" target="_blank" class="btn btn-primary btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:middle;margin-right:4px"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Open Link</a>';
+                h += '</div></div>';
+            });
+            h += '</div>';
+            c.innerHTML = h;
+        }
+
+        function getFileIcon(ext) {
+            var map = {
+                pdf:'<svg viewBox="0 0 24 24" fill="none" stroke="var(--red-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+                doc:'<svg viewBox="0 0 24 24" fill="none" stroke="var(--blue-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+                docx:'<svg viewBox="0 0 24 24" fill="none" stroke="var(--blue-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+                txt:'<svg viewBox="0 0 24 24" fill="none" stroke="var(--neutral-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>'
+            };
+            return map[ext] || '<svg viewBox="0 0 24 24" fill="none" stroke="var(--neutral-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>';
+        }
+
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
+            return (bytes/1048576).toFixed(1) + ' MB';
+        }
+
+        function filterMaterials() {
+            var q = (document.getElementById('sm-search').value || '').toLowerCase();
+            var subj = document.getElementById('filter-subject').value;
+            var cat = document.getElementById('filter-category').value;
+            var days = parseInt(document.getElementById('filter-date').value) || 0;
+            var cutoff = days ? Date.now() - days * 86400000 : 0;
+            var filtered = allMaterials.filter(function(m) {
+                if (q && !m.title.toLowerCase().includes(q) && !(m.description||'').toLowerCase().includes(q)) return false;
+                if (subj && m.subject !== subj) return false;
+                if (cat && m.category !== cat) return false;
+                if (cutoff) { var d = new Date(m.created_date).getTime(); if (d < cutoff) return false; }
+                return true;
+            });
+            renderMaterials(filtered);
+        }
+
+        async function previewMaterial(id) {
+            var r = await apiRequest('/api/student/materials/' + id);
+            if (!r.success || !r.data) return;
+            var m = r.data;
+            document.getElementById('preview-title').textContent = m.title;
+            var body = document.getElementById('preview-body');
+            var ext = m.file_type;
+            var url = '/api/uploads/' + m.file_path;
+            if (['jpg','jpeg','png','webp','gif'].indexOf(ext) >= 0) {
+                body.innerHTML = '<img src="' + url + '" alt="' + m.title + '">';
+            } else if (ext === 'pdf') {
+                body.innerHTML = '<iframe src="' + url + '" style="width:100%;height:70vh;border:none"></iframe>';
+            } else if (['mp4','mov'].indexOf(ext) >= 0) {
+                body.innerHTML = '<video controls><source src="' + url + '" type="video/' + ext + '"></video>';
+            } else if (ext === 'txt' || ext === 'csv') {
+                var txt = await fetch(url).then(function(res) { return res.text(); }).catch(function() { return 'Failed to load.'; });
+                body.innerHTML = '<pre>' + escapeHtml(txt) + '</pre>';
+            } else {
+                body.innerHTML = '<p style="color:var(--neutral-400)">Preview not available. <a href="/api/student/materials/' + id + '/download">Download file</a></p>';
+            }
+            document.getElementById('preview-overlay').style.display = 'flex';
+        }
+
+        function closePreview() { document.getElementById('preview-overlay').style.display = 'none'; }
+
+        function escapeHtml(t) { return t.replace(/[&<>"]/g, function(c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c] || c; }); }
+
+        loadMaterials();
+    </script>
+</body>
+</html>

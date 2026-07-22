@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revision Schedule - AI Learning System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .prs-hero { background:linear-gradient(135deg,#059669,#10b981);border-radius:var(--radius-lg);padding:32px;color:white;margin-bottom:24px;position:relative;overflow:hidden; }
+        .prs-hero::after { content:'';position:absolute;top:-50%;right:-20%;width:300px;height:300px;background:rgba(255,255,255,0.08);border-radius:50%; }
+        .prs-hero h1 { font-size:1.5rem;margin:0 0 4px;position:relative;z-index:1; }
+        .prs-hero p { margin:0;opacity:0.85;font-size:0.85rem;position:relative;z-index:1; }
+        .summary-row { display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px; }
+        .summary-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center; }
+        .summary-card .s-val { font-size:1.8rem;font-weight:800; }
+        .summary-card .s-lbl { font-size:0.68rem;color:var(--neutral-500);margin-top:4px; }
+        .s-val.urgent { color:#ef4444; }
+        .s-val.soon { color:#f59e0b; }
+        .s-val.ok { color:#22c55e; }
+        .s-val.total { color:var(--brand-600); }
+        .section-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px; }
+        .section-card h3 { font-size:0.85rem;margin:0 0 16px;color:var(--neutral-800);display:flex;align-items:center;gap:8px;font-weight:600; }
+        .section-card h3 .badge { font-size:0.65rem;background:var(--brand-100);color:var(--brand-700);padding:2px 8px;border-radius:99px;font-weight:600; }
+        .rev-item { display:flex;align-items:center;gap:16px;padding:14px 16px;border:1px solid var(--neutral-100);border-radius:var(--radius);margin-bottom:10px;transition:all 0.2s;background:var(--surface); }
+        body.dark .rev-item { border-color:var(--border); }
+        .rev-item:hover { border-color:var(--brand-300);box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+        .rev-rank { width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:white;flex-shrink:0; }
+        .rev-rank.high { background:#ef4444; }
+        .rev-rank.medium { background:#f59e0b; }
+        .rev-rank.low { background:#22c55e; }
+        .rev-info { flex:1; }
+        .rev-topic { font-size:0.85rem;font-weight:600;color:var(--neutral-800); }
+        .rev-meta { font-size:0.68rem;color:var(--neutral-500);margin-top:2px; }
+        .rev-score { text-align:right;min-width:80px; }
+        .rev-score .rps { font-size:1.2rem;font-weight:700;color:var(--neutral-800); }
+        .rev-score .rps-lbl { font-size:0.6rem;color:var(--neutral-500); }
+        .rev-est { font-size:0.68rem;color:var(--neutral-500);text-align:right;min-width:70px; }
+        .rev-action { flex-shrink:0; }
+        .rev-action button { font-size:0.7rem;padding:6px 12px;border-radius:6px;border:1px solid var(--brand-300);background:var(--brand-50);color:var(--brand-700);cursor:pointer;font-weight:500;transition:all 0.2s; }
+        .rev-action button:hover { background:var(--brand-500);color:white; }
+        .rps-breakdown { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;padding:12px;background:var(--neutral-50);border-radius:var(--radius);font-size:0.7rem; }
+        .rps-breakdown .rb-item { display:flex;justify-content:space-between; }
+        .rps-breakdown .rb-item span:first-child { color:var(--neutral-500); }
+        .rps-breakdown .rb-item span:last-child { font-weight:600; }
+        .empty-state { text-align:center;padding:48px 24px;color:var(--neutral-400); }
+        .empty-state svg { width:48px;height:48px;margin-bottom:12px;opacity:0.4; }
+        .formula-box { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:24px; }
+        .formula-box h4 { margin:0 0 8px;font-size:0.8rem;color:var(--neutral-800);font-weight:600; }
+        .formula-box code { background:var(--neutral-100);padding:3px 8px;border-radius:5px;font-size:0.68rem;display:inline-block;margin:2px 0;font-family:'Inter',sans-serif;color:var(--brand-600);font-weight:500; }
+        body.dark .formula-box code { color:var(--brand-400); }
+        .formula-box .sub { font-size:0.68rem;color:var(--neutral-500);margin-top:6px; }
+        @media(max-width:768px) { .summary-row { grid-template-columns:repeat(2,1fr); } .rev-item { flex-wrap:wrap; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar" id="mainNav">
+        <a href="../index.html" class="logo">AI<span>Learn</span></a>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="dashboard.html">Dashboard</a></li>
+        </ul>
+    </nav>
+
+    <main class="container dashboard">
+        <div class="prs-hero">
+            <h1>Personalized Revision Scheduler</h1>
+            <p>AI-powered revision timetable based on your performance, mastery, and learning patterns</p>
+        </div>
+
+        <div class="formula-box">
+            <h4>Research Formula: Revision Priority Score (RPS)</h4>
+            <div>
+                <code>RPS = 40 x WrongRatio</code> +
+                <code>30 x (100 - Mastery)</code> +
+                <code>20 x TimeScore</code> +
+                <code>10 x DaysSinceRevision</code>
+            </div>
+            <div style="margin-top:6px;font-size:0.7rem;opacity:0.8">Schedule: 90+ Today | 75-89 Tomorrow | 60-74 After 2 Days | 40-59 After 5 Days | Below 40 Next Week</div>
+        </div>
+
+        <div id="loading" class="loading"><div class="spinner"></div>Loading revision schedule...</div>
+        <div id="content" class="hidden">
+
+            <div class="summary-row" id="summary"></div>
+
+            <div id="today-section" class="section-card" style="display:none">
+                <h3>Today's Revision <span class="badge">Urgent</span></h3>
+                <div id="today-items"></div>
+            </div>
+
+            <div id="tomorrow-section" class="section-card" style="display:none">
+                <h3>Tomorrow <span class="badge">Soon</span></h3>
+                <div id="tomorrow-items"></div>
+            </div>
+
+            <div id="week-section" class="section-card" style="display:none">
+                <h3>This Week</h3>
+                <div id="week-items"></div>
+            </div>
+
+            <div id="nextweek-section" class="section-card" style="display:none">
+                <h3>Next Week</h3>
+                <div id="nextweek-items"></div>
+            </div>
+
+            <div id="breakdown-section" class="section-card" style="display:none">
+                <h3>RPS Breakdown</h3>
+                <div id="breakdown-content"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/auth.js"></script>
+    <script>
+    (async function() {
+        const auth = await checkAuth();
+        if (!auth || auth.role !== 'student') { window.location.href = '../login.html'; return; }
+
+        try {
+            const result = await apiRequest('/api/revision/schedule');
+            if (!result.success || !result.data) {
+                document.getElementById('loading').innerHTML = '<div class="empty-state"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><div>No quiz data yet. Complete quizzes to generate your revision schedule.</div></div>';
+                return;
+            }
+            const d = result.data;
+
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('content').classList.remove('hidden');
+
+            // Summary cards
+            var summaryHtml = '';
+            summaryHtml += '<div class="summary-card"><div class="s-val urgent">' + (d.urgent_count || 0) + '</div><div class="s-lbl">Urgent Topics</div></div>';
+            summaryHtml += '<div class="summary-card"><div class="s-val soon">' + (d.tomorrow || []).length + '</div><div class="s-lbl">Tomorrow</div></div>';
+            summaryHtml += '<div class="summary-card"><div class="s-val ok">' + (d.this_week || []).length + '</div><div class="s-lbl">This Week</div></div>';
+            summaryHtml += '<div class="summary-card"><div class="s-val total">' + (d.total_topics || 0) + '</div><div class="s-lbl">Total Topics</div></div>';
+            document.getElementById('summary').innerHTML = summaryHtml;
+
+            function renderItems(items, containerId, rankClass) {
+                var html = '';
+                items.forEach(function(item, i) {
+                    var rps = item.rps || 0;
+                    var cls = rps >= 75 ? 'high' : rps >= 40 ? 'medium' : 'low';
+                    html += '<div class="rev-item" data-topic="' + item.topic + '">' +
+                        '<div class="rev-rank ' + cls + '">' + (i + 1) + '</div>' +
+                        '<div class="rev-info">' +
+                            '<div class="rev-topic">' + item.topic + '</div>' +
+                            '<div class="rev-meta">Mastery: ' + (item.mastery_pct || 0).toFixed(0) + '% | Wrong: ' + (item.wrong_count || 0) + ' | Time: ' + (item.avg_response_time || 0).toFixed(0) + 's</div>' +
+                        '</div>' +
+                        '<div class="rev-score"><div class="rps">' + rps.toFixed(0) + '</div><div class="rps-lbl">RPS</div></div>' +
+                        '<div class="rev-est">' + (item.estimated_minutes || 15) + ' min</div>' +
+                        '<div class="rev-action"><button onclick="completeRevision(this,\'' + item.topic + '\')">Done</button></div>' +
+                    '</div>';
+                });
+                document.getElementById(containerId).innerHTML = html;
+            }
+
+            if (d.today && d.today.length > 0) {
+                document.getElementById('today-section').style.display = '';
+                renderItems(d.today, 'today-items');
+            }
+            if (d.tomorrow && d.tomorrow.length > 0) {
+                document.getElementById('tomorrow-section').style.display = '';
+                renderItems(d.tomorrow, 'tomorrow-items');
+            }
+            var thisWeek = (d.this_week || []).concat(d.next_week || []);
+            if (thisWeek.length > 0) {
+                document.getElementById('week-section').style.display = '';
+                renderItems(thisWeek, 'week-items');
+            }
+
+            // RPS Breakdown for top topic
+            if (d.all_topics && d.all_topics.length > 0) {
+                var top = d.all_topics[0];
+                document.getElementById('breakdown-section').style.display = '';
+                var b = top.breakdown || {};
+                document.getElementById('breakdown-content').innerHTML =
+                    '<div style="font-size:0.85rem;font-weight:600;margin-bottom:8px">' + top.topic + ' (RPS: ' + top.rps.toFixed(0) + ')</div>' +
+                    '<div class="rps-breakdown">' +
+                        '<div class="rb-item"><span>Wrong Attempt Score</span><span>' + (b.wrong_attempt_score || 0).toFixed(1) + ' / 40</span></div>' +
+                        '<div class="rb-item"><span>Mastery Score</span><span>' + (b.mastery_score || 0).toFixed(1) + ' / 30</span></div>' +
+                        '<div class="rb-item"><span>Response Time Score</span><span>' + (b.time_score || 0).toFixed(1) + ' / 20</span></div>' +
+                        '<div class="rb-item"><span>Recency Score</span><span>' + (b.recency_score || 0).toFixed(1) + ' / 10</span></div>' +
+                    '</div>';
+            }
+
+        } catch (err) {
+            document.getElementById('loading').innerHTML = '<div class="empty-state">Error loading schedule: ' + err.message + '</div>';
+        }
+    })();
+
+    async function completeRevision(btn, topic) {
+        btn.textContent = 'Saving...';
+        btn.disabled = true;
+        var result = await apiRequest('/api/revision/complete', 'POST', { topic: topic, new_mastery: 80 });
+        if (result.success) {
+            var item = btn.closest('.rev-item');
+            if (item) item.style.opacity = '0.4';
+            btn.textContent = 'Done!';
+        } else {
+            btn.textContent = 'Done';
+            btn.disabled = false;
+        }
+    }
+    </script>
+</body>
+</html>

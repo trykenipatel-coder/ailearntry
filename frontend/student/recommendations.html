@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommendations - AI Learning System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .ere-hero { background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:var(--radius-lg);padding:32px;color:white;margin-bottom:24px;position:relative;overflow:hidden; }
+        .ere-hero::after { content:'';position:absolute;top:-50%;right:-20%;width:300px;height:300px;background:rgba(255,255,255,0.08);border-radius:50%; }
+        .ere-hero h1 { font-size:1.5rem;margin:0 0 4px;position:relative;z-index:1; }
+        .ere-hero p { margin:0;opacity:0.85;font-size:0.85rem;position:relative;z-index:1; }
+        .rec-summary { display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px; }
+        .rec-summary .rs-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center; }
+        .rec-summary .rs-val { font-size:1.8rem;font-weight:800; }
+        .rec-summary .rs-lbl { font-size:0.68rem;color:var(--neutral-500);margin-top:4px; }
+        .rec-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:12px;transition:all 0.2s; }
+        .rec-card:hover { border-color:var(--brand-300);box-shadow:0 2px 12px rgba(0,0,0,0.05); }
+        .rec-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:12px; }
+        .rec-topic { font-size:1rem;font-weight:700;color:var(--neutral-800); }
+        .rec-priority { font-size:0.65rem;font-weight:600;padding:3px 10px;border-radius:99px;text-transform:uppercase; }
+        .rec-priority.High { background:#fef2f2;color:#dc2626; }
+        body.dark .rec-priority.High { background:rgba(220,38,38,0.15); }
+        .rec-priority.Medium { background:#fffbeb;color:#d97706; }
+        body.dark .rec-priority.Medium { background:rgba(217,119,6,0.15); }
+        .rec-priority.Low { background:#f0fdf4;color:#16a34a; }
+        body.dark .rec-priority.Low { background:rgba(22,163,74,0.15); }
+        .rec-type-badge { display:inline-block;font-size:0.7rem;background:var(--brand-50);color:var(--brand-700);padding:2px 8px;border-radius:4px;margin-bottom:10px;font-weight:500; }
+        body.dark .rec-type-badge { background:rgba(99,102,241,0.12);color:var(--brand-400); }
+        .rec-reasons { margin:0 0 12px;padding:0;list-style:none; }
+        .rec-reasons li { font-size:0.75rem;color:var(--neutral-600);padding:4px 0;padding-left:18px;position:relative; }
+        .rec-reasons li::before { content:'';position:absolute;left:0;top:10px;width:8px;height:8px;border-radius:50%;background:var(--brand-400); }
+        .rec-metrics { display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px;background:var(--neutral-50);border-radius:var(--radius);margin-bottom:12px; }
+        body.dark .rec-metrics { background:var(--neutral-100); }
+        .rec-metric { text-align:center; }
+        .rec-metric .rm-val { font-size:0.85rem;font-weight:700;color:var(--neutral-800); }
+        .rec-metric .rm-lbl { font-size:0.6rem;color:var(--neutral-500); }
+        .rec-footer { display:flex;align-items:center;justify-content:space-between; }
+        .rec-confidence { font-size:0.65rem;color:var(--neutral-500); }
+        .rec-confidence span { font-weight:600; }
+        .rec-confidence span.High { color:#16a34a; }
+        .rec-confidence span.Medium { color:#d97706; }
+        .rec-confidence span.Low { color:#dc2626; }
+        .rec-est { font-size:0.7rem;color:var(--neutral-500); }
+        .rec-rule-box { background:linear-gradient(135deg,#faf5ff,#f3e8ff);border:1px solid #e9d5ff;border-radius:var(--radius);padding:16px;margin-bottom:24px;font-size:0.75rem;color:#6b21a8; }
+        body.dark .rec-rule-box { background:linear-gradient(135deg,rgba(109,40,217,0.12),rgba(168,85,247,0.08));border-color:rgba(168,85,247,0.2);color:var(--neutral-500); }
+        .rec-rule-box h4 { margin:0 0 8px;font-size:0.8rem; }
+        .rec-rule-box .rule { display:flex;gap:8px;align-items:center;margin:4px 0; }
+        .rec-rule-box .rule-dot { width:6px;height:6px;border-radius:50%;background:#a855f7;flex-shrink:0; }
+        .empty-state { text-align:center;padding:48px 24px;color:var(--neutral-400); }
+        .empty-state svg { width:48px;height:48px;margin-bottom:12px;opacity:0.4; }
+        @media(max-width:768px) { .rec-summary { grid-template-columns:repeat(2,1fr); } .rec-metrics { grid-template-columns:repeat(2,1fr); } }
+    </style>
+</head>
+<body>
+    <nav class="navbar" id="mainNav">
+        <a href="../index.html" class="logo">AI<span>Learn</span></a>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="dashboard.html">Dashboard</a></li>
+        </ul>
+    </nav>
+
+    <main class="container dashboard">
+        <div class="ere-hero">
+            <h1>Explainable Recommendations</h1>
+            <p>Transparent, rule-based learning recommendations with clear explanations</p>
+        </div>
+
+        <div class="rec-rule-box">
+            <h4>Recommendation Rules (Research ERE Model)</h4>
+            <div class="rule"><div class="rule-dot"></div>Accuracy &lt; 50% -> Study Topic (Revision Needed)</div>
+            <div class="rule"><div class="rule-dot"></div>Average Time &gt; 60s -> Timed Practice (Speed Issue)</div>
+            <div class="rule"><div class="rule-dot"></div>Wrong Attempts &gt; 5 -> Practice Quiz (Focus Area)</div>
+            <div class="rule"><div class="rule-dot"></div>Mastery &gt; 90% -> Skip Revision (Excellent)</div>
+            <div class="rule"><div class="rule-dot"></div>3 Consecutive Wrong -> Easy Level (Build Confidence)</div>
+        </div>
+
+        <div id="loading" class="loading"><div class="spinner"></div>Generating recommendations...</div>
+        <div id="content" class="hidden">
+
+            <div class="rec-summary" id="summary"></div>
+            <div id="recs-container"></div>
+        </div>
+    </main>
+
+    <script src="../js/auth.js"></script>
+    <script>
+    (async function() {
+        const auth = await checkAuth();
+        if (!auth || auth.role !== 'student') { window.location.href = '../login.html'; return; }
+
+        try {
+            const result = await apiRequest('/api/recommendations');
+            if (!result.success || !result.data) {
+                document.getElementById('loading').innerHTML = '<div class="empty-state"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg><div>Complete some quizzes to get personalized recommendations.</div></div>';
+                return;
+            }
+            const d = result.data;
+            var recs = d.recommendations || [];
+            var summary = d.summary || {};
+
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('content').classList.remove('hidden');
+
+            var sumHtml = '';
+            sumHtml += '<div class="rs-card"><div class="rs-val" style="color:var(--brand-600)">' + (summary.total || 0) + '</div><div class="rs-lbl">Total Recommendations</div></div>';
+            sumHtml += '<div class="rs-card"><div class="rs-val" style="color:#dc2626">' + (summary.high || 0) + '</div><div class="rs-lbl">High Priority</div></div>';
+            sumHtml += '<div class="rs-card"><div class="rs-val" style="color:#d97706">' + (summary.medium || 0) + '</div><div class="rs-lbl">Medium Priority</div></div>';
+            sumHtml += '<div class="rs-card"><div class="rs-val" style="color:#16a34a">' + (summary.low || 0) + '</div><div class="rs-lbl">Low Priority</div></div>';
+            document.getElementById('summary').innerHTML = sumHtml;
+
+            var recsHtml = '';
+            recs.forEach(function(r) {
+                var reasons = (r.reason || '').split(' | ');
+                var reasonsHtml = '';
+                reasons.forEach(function(reason) {
+                    if (reason.trim()) reasonsHtml += '<li>' + reason.trim() + '</li>';
+                });
+
+                recsHtml += '<div class="rec-card">' +
+                    '<div class="rec-header">' +
+                        '<div class="rec-topic">' + r.topic + '</div>' +
+                        '<div class="rec-priority ' + r.priority + '">' + r.priority + '</div>' +
+                    '</div>' +
+                    '<div class="rec-type-badge">' + r.recommendation_type + '</div>' +
+                    '<ul class="rec-reasons">' + reasonsHtml + '</ul>' +
+                    '<div class="rec-metrics">' +
+                        '<div class="rec-metric"><div class="rm-val">' + (r.accuracy_snapshot || 0).toFixed(0) + '%</div><div class="rm-lbl">Accuracy</div></div>' +
+                        '<div class="rec-metric"><div class="rm-val">' + (r.mastery_snapshot || 0).toFixed(0) + '%</div><div class="rm-lbl">Mastery</div></div>' +
+                        '<div class="rec-metric"><div class="rm-val">' + (r.avg_time_snapshot || 0).toFixed(0) + 's</div><div class="rm-lbl">Avg Time</div></div>' +
+                        '<div class="rec-metric"><div class="rm-val">' + (r.wrong_attempts_snapshot || 0) + '</div><div class="rm-lbl">Wrong Attempts</div></div>' +
+                    '</div>' +
+                    '<div class="rec-footer">' +
+                        '<div class="rec-confidence">Confidence: <span class="' + r.confidence + '">' + r.confidence + '</span></div>' +
+                        '<div class="rec-est">Est. ' + (r.estimated_minutes || 15) + ' min</div>' +
+                    '</div>' +
+                '</div>';
+            });
+
+            if (recs.length === 0) {
+                recsHtml = '<div class="empty-state">No recommendations at this time. Keep learning!</div>';
+            }
+            document.getElementById('recs-container').innerHTML = recsHtml;
+
+        } catch (err) {
+            document.getElementById('loading').innerHTML = '<div class="empty-state">Error loading recommendations: ' + err.message + '</div>';
+        }
+    })();
+    </script>
+</body>
+</html>

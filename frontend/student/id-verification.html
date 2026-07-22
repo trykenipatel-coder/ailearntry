@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ID Verification — AILearn</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .id-verify-wrap { max-width:600px; margin:40px auto; padding:0 20px; }
+        .id-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:32px; margin-bottom:24px; }
+        .id-card h2 { font-size:20px; font-weight:700; margin-bottom:6px; }
+        .id-card p { font-size:13px; color:var(--text-secondary); margin-bottom:20px; line-height:1.6; }
+        .upload-zone { border:2px dashed var(--border); border-radius:12px; padding:40px; text-align:center; cursor:pointer; transition:all .2s; position:relative; }
+        .upload-zone:hover { border-color:var(--brand-500); background:rgba(99,102,241,.03); }
+        .upload-zone.has-image { border-style:solid; border-color:var(--brand-500); padding:10px; }
+        .upload-zone img { max-width:100%; max-height:300px; border-radius:8px; display:none; }
+        .upload-zone.has-image img { display:block; margin:0 auto; }
+        .upload-zone .upload-icon { font-size:40px; margin-bottom:12px; color:var(--text-tertiary); }
+        .upload-zone .upload-text { font-size:14px; color:var(--text-secondary); }
+        .upload-zone .upload-hint { font-size:11px; color:var(--text-tertiary); margin-top:6px; }
+        .upload-zone input[type="file"] { position:absolute; inset:0; opacity:0; cursor:pointer; }
+        .id-fields { margin-top:20px; display:grid; gap:12px; }
+        .field-group { display:flex; flex-direction:column; gap:4px; }
+        .field-group label { font-size:12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.3px; }
+        .field-group input { padding:10px 14px; border:1px solid var(--border); border-radius:8px; font-size:14px; font-family:inherit; background:var(--bg-secondary); color:var(--text-primary); }
+        .field-group input:focus { outline:none; border-color:var(--brand-500); box-shadow:0 0 0 3px rgba(99,102,241,.1); }
+        .verify-btn { width:100%; padding:12px; border:none; border-radius:10px; background:var(--brand-500); color:#fff; font-size:14px; font-weight:600; cursor:pointer; transition:all .2s; font-family:inherit; margin-top:16px; }
+        .verify-btn:hover { background:var(--brand-600); transform:translateY(-1px); }
+        .verify-btn:disabled { opacity:.5; cursor:not-allowed; }
+        .status-card { padding:20px; border-radius:12px; margin-bottom:16px; display:flex; align-items:center; gap:14px; }
+        .status-card.verified { background:rgba(34,197,94,.06); border:1px solid rgba(34,197,94,.2); }
+        .status-card.pending { background:rgba(234,179,8,.06); border:1px solid rgba(234,179,8,.2); }
+        .status-card.failed { background:rgba(239,68,68,.06); border:1px solid rgba(239,68,68,.2); }
+        .status-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+        .status-card.verified .status-icon { background:rgba(34,197,94,.12); color:#16a34a; }
+        .status-card.pending .status-icon { background:rgba(234,179,8,.12); color:#ca8a04; }
+        .status-card.failed .status-icon { background:rgba(239,68,68,.12); color:#dc2626; }
+        .status-info .s-title { font-size:14px; font-weight:600; }
+        .status-info .s-desc { font-size:12px; color:var(--text-secondary); margin-top:2px; }
+        .face-section { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:32px; margin-bottom:24px; }
+        .face-section h3 { font-size:16px; font-weight:700; margin-bottom:16px; }
+        .camera-preview { width:100%; max-width:320px; border-radius:12px; background:#1a1b26; margin:0 auto 16px; display:block; }
+        .camera-controls { display:flex; gap:10px; justify-content:center; }
+        .cam-btn { padding:10px 20px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text-secondary); font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; font-family:inherit; }
+        .cam-btn:hover { background:var(--bg-secondary); }
+        .cam-btn.primary { background:var(--brand-500); color:#fff; border-color:var(--brand-500); }
+        .cam-btn.primary:hover { background:var(--brand-600); }
+        .captured-img { width:100%; max-width:320px; border-radius:12px; margin:0 auto 16px; display:none; }
+    </style>
+</head>
+<body class="bg-primary">
+    <nav class="navbar" id="mainNav"><a href="../index.html" class="logo">AI<span>Learn</span></a><ul class="nav-links" id="navLinks"></ul></nav>
+
+    <div class="id-verify-wrap">
+        <div style="margin-bottom:24px;">
+            <h1 style="font-size:24px;font-weight:800;margin-bottom:4px;">Identity Verification</h1>
+            <p style="font-size:13px;color:var(--text-secondary);">Verify your identity before taking exams. Upload your ID card and take a selfie for face verification.</p>
+        </div>
+
+        <div id="faceStatus"></div>
+        <div id="idStatus"></div>
+
+        <div class="id-card">
+            <h2>ID Card Upload</h2>
+            <p>Upload a clear photo of your student ID card, admission card, or government ID. The name on the ID must match your profile.</p>
+            <div class="upload-zone" id="uploadZone">
+                <div class="upload-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                </div>
+                <div class="upload-text">Click to upload or drag and drop</div>
+                <div class="upload-hint">JPG, PNG or PDF (max 5MB)</div>
+                <img id="idPreview" alt="ID Preview">
+                <input type="file" id="idInput" accept="image/*">
+            </div>
+            <div class="id-fields">
+                <div class="field-group">
+                    <label>Full Name (as on ID)</label>
+                    <input type="text" id="idName" placeholder="Enter your full name">
+                </div>
+                <div class="field-group">
+                    <label>ID Number</label>
+                    <input type="text" id="idNumber" placeholder="Enter ID number">
+                </div>
+            </div>
+            <button class="verify-btn" id="submitIdBtn" onclick="submitIdVerification()">Submit ID for Verification</button>
+        </div>
+
+        <div class="face-section">
+            <h3>Face Verification (Selfie)</h3>
+            <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Take a live selfie. This will be used to verify your identity during exams.</p>
+            <video id="cameraFeed" class="camera-preview" autoplay playsinline style="display:none;"></video>
+            <canvas id="cameraCanvas" style="display:none;"></canvas>
+            <img id="capturedFace" class="captured-img" alt="Captured">
+            <div class="camera-controls">
+                <button class="cam-btn" id="startCamBtn" onclick="startCamera()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    Start Camera
+                </button>
+                <button class="cam-btn primary" id="captureBtn" onclick="captureFace()" style="display:none;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="10"/></svg>
+                    Capture
+                </button>
+                <button class="cam-btn" id="retakeBtn" onclick="retakeFace()" style="display:none;">Retake</button>
+                <button class="cam-btn primary" id="verifyFaceBtn" onclick="verifyFace()" style="display:none;">Verify Face</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script>
+    let idFile = null;
+    let stream = null;
+    let capturedData = null;
+
+    document.addEventListener("DOMContentLoaded", function() {
+        if (typeof checkAuth === "function") checkAuth();
+        loadStatuses();
+
+        document.getElementById("idInput").addEventListener("change", function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            idFile = file;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                document.getElementById("idPreview").src = ev.target.result;
+                document.getElementById("uploadZone").classList.add("has-image");
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+
+    async function loadStatuses() {
+        try {
+            const r = await fetch("/api/proctoring/my-sessions", {credentials:"include"});
+            const j = await r.json();
+            if (j.success && j.data.length) {
+                const s = j.data[0];
+                const faceEl = document.getElementById("faceStatus");
+                const idEl = document.getElementById("idStatus");
+                if (s.face_verified) {
+                    faceEl.innerHTML = '<div class="status-card verified"><div class="status-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><div class="status-info"><div class="s-title">Face Verified</div><div class="s-desc">Your face has been registered and verified.</div></div></div>';
+                }
+                if (s.id_verified) {
+                    idEl.innerHTML = '<div class="status-card verified"><div class="status-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><div class="status-info"><div class="s-title">ID Verified</div><div class="s-desc">Your identity document has been verified.</div></div></div>';
+                }
+            }
+        } catch(e) {}
+    }
+
+    async function submitIdVerification() {
+        const name = document.getElementById("idName").value.trim();
+        const number = document.getElementById("idNumber").value.trim();
+        if (!name) { alert("Please enter your name"); return; }
+
+        const btn = document.getElementById("submitIdBtn");
+        btn.disabled = true;
+        btn.textContent = "Submitting...";
+
+        let photoData = "";
+        if (idFile) {
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                photoData = e.target.result;
+                await doIdSubmit(photoData, name, number, btn);
+            };
+            reader.readAsDataURL(idFile);
+        } else {
+            await doIdSubmit("", name, number, btn);
+        }
+    }
+
+    async function doIdSubmit(photo, name, number, btn) {
+        try {
+            const r = await fetch("/api/proctoring/register-id", {
+                method:"POST", headers:{"Content-Type":"application/json"}, credentials:"include",
+                body: JSON.stringify({id_photo: photo, name, number})
+            });
+            const j = await r.json();
+            if (j.success) {
+                document.getElementById("idStatus").innerHTML = '<div class="status-card verified"><div class="status-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><div class="status-info"><div class="s-title">ID Submitted</div><div class="s-desc">Your ID has been submitted for verification.</div></div></div>';
+            }
+        } catch(e) { alert("Error: " + e.message); }
+        btn.disabled = false;
+        btn.textContent = "Submit ID for Verification";
+    }
+
+    async function startCamera() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"user", width:640, height:480}});
+            const video = document.getElementById("cameraFeed");
+            video.srcObject = stream;
+            video.style.display = "block";
+            document.getElementById("capturedFace").style.display = "none";
+            document.getElementById("startCamBtn").style.display = "none";
+            document.getElementById("captureBtn").style.display = "";
+            document.getElementById("retakeBtn").style.display = "none";
+            document.getElementById("verifyFaceBtn").style.display = "none";
+        } catch(e) {
+            alert("Camera access denied. Please allow camera permissions.");
+        }
+    }
+
+    function captureFace() {
+        const video = document.getElementById("cameraFeed");
+        const canvas = document.getElementById("cameraCanvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d").drawImage(video, 0, 0);
+        capturedData = canvas.toDataURL("image/jpeg", 0.8);
+
+        document.getElementById("capturedFace").src = capturedData;
+        document.getElementById("capturedFace").style.display = "block";
+        video.style.display = "none";
+
+        if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+
+        document.getElementById("captureBtn").style.display = "none";
+        document.getElementById("retakeBtn").style.display = "";
+        document.getElementById("verifyFaceBtn").style.display = "";
+    }
+
+    function retakeFace() {
+        capturedData = null;
+        document.getElementById("capturedFace").style.display = "none";
+        document.getElementById("retakeBtn").style.display = "none";
+        document.getElementById("verifyFaceBtn").style.display = "none";
+        document.getElementById("startCamBtn").style.display = "";
+    }
+
+    async function verifyFace() {
+        if (!capturedData) return;
+        const quizId = new URLSearchParams(window.location.search).get("quiz_id") || 1;
+        try {
+            const r = await fetch("/api/proctoring/verify-face", {
+                method:"POST", headers:{"Content-Type":"application/json"}, credentials:"include",
+                body: JSON.stringify({quiz_id: parseInt(quizId), photo: capturedData, confidence: 0.95})
+            });
+            const j = await r.json();
+            if (j.success && j.data.verified) {
+                document.getElementById("faceStatus").innerHTML = '<div class="status-card verified"><div class="status-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><div class="status-info"><div class="s-title">Face Verified</div><div class="s-desc">Your face has been registered and verified successfully.</div></div></div>';
+                document.getElementById("verifyFaceBtn").style.display = "none";
+                document.getElementById("retakeBtn").style.display = "none";
+            }
+        } catch(e) { alert("Verification failed: " + e.message); }
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semester Report — AILearn</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .report-container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+        .report-hero { text-align: center; padding: 48px 0 32px; }
+        .report-hero h1 { font-size: 2rem; font-weight: 700; margin: 0 0 6px; }
+        .report-hero .sub { color: var(--text-secondary); font-size: 0.95rem; }
+
+        .report-meta { display: flex; justify-content: center; gap: 32px; margin: 24px 0 32px; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+        .report-meta .item { text-align: center; }
+        .report-meta .item .label { font-size: 0.75rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; }
+        .report-meta .item .value { font-size: 1rem; font-weight: 600; color: var(--text-primary); margin-top: 2px; }
+
+        .report-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
+        .stat-card .icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; }
+        .stat-card .icon svg { width: 22px; height: 22px; }
+        .stat-card .num { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); }
+        .stat-card .lbl { font-size: 0.78rem; color: var(--text-tertiary); margin-top: 2px; }
+
+        .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+        .section-card h2 { font-size: 1.1rem; font-weight: 600; margin: 0 0 16px; color: var(--text-primary); }
+
+        .mastery-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .mastery-bar .topic { width: 160px; font-size: 0.85rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mastery-bar .bar-track { flex: 1; height: 8px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden; }
+        .mastery-bar .bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+        .mastery-bar .pct { width: 45px; text-align: right; font-size: 0.82rem; font-weight: 600; }
+
+        .badge-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+        .badge-item { display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.85rem; color: var(--text-secondary); }
+        .badge-item .badge-icon { font-size: 1.1rem; }
+
+        .rec-list { list-style: none; padding: 0; margin: 0; }
+        .rec-list li { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 0.9rem; color: var(--text-secondary); display: flex; align-items: flex-start; gap: 8px; }
+        .rec-list li:last-child { border-bottom: none; }
+        .rec-list .rec-icon { color: var(--brand-500); flex-shrink: 0; margin-top: 2px; }
+
+        .download-btn { display: flex; align-items: center; gap: 8px; margin: 24px auto 0; padding: 12px 28px; background: var(--brand-500); color: #fff; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer; }
+        .download-btn:hover { opacity: 0.9; }
+        .download-btn svg { width: 18px; height: 18px; }
+
+        .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+
+        @media (max-width: 768px) {
+            .report-grid { grid-template-columns: repeat(2, 1fr); }
+            .chart-row { grid-template-columns: 1fr; }
+            .report-meta { flex-wrap: wrap; gap: 16px; }
+        }
+        @media print {
+            .download-btn { display: none; }
+            .report-hero { padding-top: 16px; }
+        }
+    </style>
+</head>
+<body class="bg-primary">
+    <nav class="navbar"></nav>
+    <div id="navLinks"></div>
+
+    <div class="report-container">
+        <div class="report-hero">
+            <h1>Semester Learning Report</h1>
+            <p class="sub">Complete summary of your learning progress</p>
+        </div>
+
+        <div class="report-meta" id="reportMeta" style="display:none;">
+            <div class="item"><div class="label">Student</div><div class="value" id="metaName">—</div></div>
+            <div class="item"><div class="label">Code</div><div class="value" id="metaCode">—</div></div>
+            <div class="item"><div class="label">Course</div><div class="value" id="metaCourse">—</div></div>
+            <div class="item"><div class="label">Semester</div><div class="value" id="metaSem">—</div></div>
+        </div>
+
+        <div class="report-grid" id="statsGrid"></div>
+
+        <div class="chart-row">
+            <div class="section-card">
+                <h2>Topic Mastery</h2>
+                <canvas id="masteryChart" height="220"></canvas>
+            </div>
+            <div class="section-card">
+                <h2>Learning Improvement Trend</h2>
+                <canvas id="trendChart" height="220"></canvas>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>Topic-Wise Mastery</h2>
+            <div id="masteryBars"></div>
+        </div>
+
+        <div class="chart-row">
+            <div class="section-card">
+                <h2>Achievements</h2>
+                <div class="badge-grid" id="badgeGrid"></div>
+            </div>
+            <div class="section-card">
+                <h2>Personalized Recommendations</h2>
+                <ul class="rec-list" id="recList"></ul>
+            </div>
+        </div>
+
+        <button class="download-btn" onclick="window.print()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-3-3m3 3l3-3M5 17v2a2 2 0 002 2h10a2 2 0 002-2v-2"/></svg>
+            Download Report (PDF)
+        </button>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script>
+
+    function masteryColor(pct) {
+        if (pct >= 80) return 'var(--green-500, #22c55e)';
+        if (pct >= 60) return 'var(--blue-500, #3b82f6)';
+        if (pct >= 40) return 'var(--yellow-500, #eab308)';
+        return 'var(--red-500, #ef4444)';
+    }
+
+    function renderStats(d) {
+        const items = [
+            { icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', num: d.total_quizzes, lbl: 'Quizzes Attempted', color: 'var(--brand-100, #e0e7ff)', svg: 'var(--brand-500, #6366f1)' },
+            { icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', num: d.avg_score + '%', lbl: 'Average Score', color: 'rgba(34,197,94,0.1)', svg: 'var(--green-500, #22c55e)' },
+            { icon: 'M13 10V3L4 14h7v7l9-11h-7z', num: d.als_score + '%', lbl: 'Adaptive Learning Score', color: 'rgba(234,179,8,0.1)', svg: 'var(--yellow-500, #eab308)' },
+            { icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', num: d.avg_response_time + 's', lbl: 'Avg Response Time', color: 'rgba(168,85,247,0.1)', svg: 'var(--purple-500, #a855f7)' },
+        ];
+        document.getElementById('statsGrid').innerHTML = items.map(it => `
+            <div class="stat-card">
+                <div class="icon" style="background:${it.color}"><svg viewBox="0 0 24 24" fill="none" stroke="${it.svg}" stroke-width="2"><path d="${it.icon}"/></svg></div>
+                <div class="num">${it.num}</div>
+                <div class="lbl">${it.lbl}</div>
+            </div>
+        `).join('');
+    }
+
+    function renderMasteryBars(topics) {
+        if (!topics || !topics.length) {
+            document.getElementById('masteryBars').innerHTML = '<p style="color:var(--text-tertiary);font-size:0.9rem;">No topic data yet</p>';
+            return;
+        }
+        document.getElementById('masteryBars').innerHTML = topics.map(t => `
+            <div class="mastery-bar">
+                <div class="topic">${t.topic}</div>
+                <div class="bar-track"><div class="bar-fill" style="width:${t.mastery_pct}%;background:${masteryColor(t.mastery_pct)}"></div></div>
+                <div class="pct" style="color:${masteryColor(t.mastery_pct)}">${t.mastery_pct}%</div>
+            </div>
+        `).join('');
+    }
+
+    function renderCharts(d) {
+        if (!d.topic_mastery || !d.topic_mastery.length) return;
+
+        const labels = d.topic_mastery.map(t => t.topic.length > 16 ? t.topic.substring(0, 14) + '…' : t.topic);
+        const data = d.topic_mastery.map(t => t.mastery_pct);
+
+        new Chart(document.getElementById('masteryChart'), {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{ label: 'Mastery %', data, backgroundColor: data.map(v => v >= 70 ? '#22c55e' : v >= 50 ? '#3b82f6' : v >= 30 ? '#eab308' : '#ef4444'), borderRadius: 6 }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, max: 100, grid: { color: 'rgba(128,128,128,0.1)' }, ticks: { color: 'var(--text-tertiary)' } }, x: { grid: { display: false }, ticks: { color: 'var(--text-tertiary)', maxRotation: 45 } } }
+            }
+        });
+
+        if (d.progress_timeline && d.progress_timeline.length) {
+            new Chart(document.getElementById('trendChart'), {
+                type: 'line',
+                data: {
+                    labels: d.progress_timeline.map(t => t.date),
+                    datasets: [{ label: 'Score %', data: d.progress_timeline.map(t => t.accuracy), borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#6366f1' }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, max: 100, grid: { color: 'rgba(128,128,128,0.1)' }, ticks: { color: 'var(--text-tertiary)' } }, x: { grid: { display: false }, ticks: { color: 'var(--text-tertiary)', maxRotation: 45 } } }
+                }
+            });
+        }
+    }
+
+    async function loadReport() {
+        try {
+            const r = await fetch('/api/student/semester-report', { credentials: 'include' });
+            const j = await r.json();
+            if (!j.success) return;
+            const d = j.data;
+
+            document.getElementById('reportMeta').style.display = 'flex';
+            document.getElementById('metaName').textContent = d.student_name;
+            document.getElementById('metaCode').textContent = d.student_code;
+            document.getElementById('metaCourse').textContent = d.course || '—';
+            document.getElementById('metaSem').textContent = d.semester;
+
+            renderStats(d);
+            renderMasteryBars(d.topic_mastery);
+            renderCharts(d);
+
+            if (d.achievements && d.achievements.length) {
+                document.getElementById('badgeGrid').innerHTML = d.achievements.map(a =>
+                    `<div class="badge-item"><span class="badge-icon">${a.icon || ''}</span>${a.name}</div>`
+                ).join('');
+            } else {
+                document.getElementById('badgeGrid').innerHTML = '<p style="color:var(--text-tertiary);font-size:0.9rem;">No achievements yet</p>';
+            }
+
+            document.getElementById('recList').innerHTML = (d.recommendations || []).map(r =>
+                `<li><svg class="rec-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>${r}</li>`
+            ).join('');
+
+        } catch(e) { console.error('Report load failed:', e); }
+    }
+
+    loadReport();
+    </script>
+</body>
+</html>

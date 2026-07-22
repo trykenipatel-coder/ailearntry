@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}AI Quiz Generator{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>AI Quiz Generator</h1>
+    <p>Generate quizzes automatically by entering a topic.</p>
+</div>
+
+<div class="generate-section">
+    <div class="grid-2">
+        <div class="form-group">
+            <label>Topic</label>
+            <input type="text" id="ai-topic" placeholder="e.g. Human Digestive System" required>
+        </div>
+        <div class="form-group">
+            <label>Subject</label>
+            <input type="text" id="ai-subject" placeholder="e.g. Science">
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Number of Questions</label>
+        <select id="ai-num-questions">
+            <option value="3">3 Questions</option>
+            <option value="5" selected>5 Questions</option>
+            <option value="10">10 Questions</option>
+        </select>
+    </div>
+    <button class="btn btn-success btn-lg" id="ai-generate-btn" onclick="generateAIQuiz()">Generate with AI</button>
+</div>
+
+<div id="ai-output">
+    <div class="alert alert-info">
+        Enter a topic and click "Generate with AI" to automatically create a quiz.
+        <br><small>For best results, provide a specific topic. If Gemini API key is not configured, template questions will be used.</small>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/mentor.js"></script>
+{% endblock %}

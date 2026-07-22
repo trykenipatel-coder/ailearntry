@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - AI Learning System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            min-height:100vh; display:flex; align-items:center; justify-content:center;
+            background:#f8fafc;
+            background-image:
+                radial-gradient(ellipse 80% 60% at 50% -20%, rgba(99,102,241,0.06), transparent),
+                radial-gradient(ellipse 60% 50% at 80% 80%, rgba(99,102,241,0.03), transparent);
+            padding:24px;
+        }
+        .login-wrapper { width:100%; max-width:400px; }
+        .login-header { text-align:center; margin-bottom:28px; }
+        .login-logo {
+            font-size:1.75rem; font-weight:800; letter-spacing:-0.05em;
+            color:var(--neutral-800);
+        }
+        .login-logo span { color:var(--brand-600); }
+        .login-subtitle { font-size:0.8rem; color:var(--neutral-400); margin-top:6px; }
+
+        .login-card {
+            background:var(--surface);
+            border:1px solid var(--border);
+            border-radius:16px;
+            padding:36px 32px 32px;
+            box-shadow:0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04);
+        }
+        .login-card h2 {
+            font-size:1.15rem; font-weight:700; letter-spacing:-0.02em;
+            color:var(--neutral-900); margin-bottom:2px;
+        }
+        .login-card .sub { font-size:0.8rem; color:var(--neutral-400); margin-bottom:24px; }
+
+        .role-tabs {
+            display:flex; gap:0; margin-bottom:24px;
+            background:var(--neutral-100); border-radius:10px; padding:3px;
+        }
+        .role-tab {
+            flex:1; padding:9px 0; text-align:center; border-radius:8px;
+            border:none; background:transparent; cursor:pointer;
+            font-size:0.8rem; font-weight:500; color:var(--neutral-500);
+            transition:all 0.2s ease; font-family:var(--font);
+        }
+        .role-tab.active {
+            background:var(--surface); color:var(--neutral-900);
+            box-shadow:0 1px 3px rgba(0,0,0,0.06);
+        }
+        .role-tab:hover:not(.active) { color:var(--neutral-700); }
+
+        .field { margin-bottom:16px; }
+        .field label {
+            display:block; font-size:0.75rem; font-weight:600;
+            color:var(--neutral-600); margin-bottom:6px; letter-spacing:-0.01em;
+        }
+        .field .input-wrap { position:relative; }
+        .field .input-wrap .icon {
+            position:absolute; left:12px; top:50%; transform:translateY(-50%);
+            color:var(--neutral-400); pointer-events:none; opacity:0.45;
+        }
+        .field input {
+            width:100%; padding:10px 14px 10px 38px;
+            border:1.5px solid var(--neutral-200); border-radius:9px;
+            font-size:0.85rem; font-family:var(--font);
+            background:var(--surface); color:var(--neutral-800);
+            transition:all 0.2s; box-sizing:border-box;
+        }
+        .field input::placeholder { color:var(--neutral-400); }
+        .field input:hover { border-color:var(--neutral-300); }
+        .field input:focus {
+            outline:none; border-color:var(--brand-500);
+            box-shadow:0 0 0 3px rgba(99,102,241,0.08);
+        }
+
+        .row-between { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+        .row-between a { font-size:0.75rem; color:var(--neutral-400); text-decoration:none; }
+        .row-between a:hover { color:var(--brand-600); }
+
+        .btn-primary {
+            width:100%; padding:11px; border:none; border-radius:9px;
+            background:var(--brand-600); color:#fff;
+            font-size:0.85rem; font-weight:600; cursor:pointer;
+            font-family:var(--font); transition:all 0.2s;
+        }
+        .btn-primary:hover { background:var(--brand-700); transform:translateY(-1px); box-shadow:0 4px 12px rgba(99,102,241,0.25); }
+        .btn-primary:active { transform:translateY(0); }
+        .btn-primary:disabled { opacity:0.5; cursor:not-allowed; transform:none; box-shadow:none; }
+
+        .divider { display:flex; align-items:center; gap:12px; margin:22px 0; color:var(--neutral-400); font-size:0.72rem; }
+        .divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+        .btn-google {
+            display:flex; align-items:center; justify-content:center; gap:10px;
+            width:100%; padding:10px; border:1.5px solid var(--border);
+            border-radius:9px; background:var(--surface); cursor:pointer;
+            font-family:var(--font); font-size:0.8rem; font-weight:600;
+            color:var(--neutral-700); transition:all 0.2s;
+        }
+        .btn-google:hover { border-color:var(--neutral-300); background:var(--neutral-50); }
+        .btn-google img { width:16px; height:16px; }
+
+        .demo-box {
+            margin-top:20px; padding:14px 16px;
+            background:var(--neutral-50); border-radius:10px;
+            border:1px solid var(--border-subtle);
+        }
+        .demo-box .demo-title {
+            display:flex; align-items:center; gap:6px;
+            font-size:0.68rem; font-weight:600; color:var(--neutral-500);
+            text-transform:uppercase; letter-spacing:0.05em; margin-bottom:10px;
+        }
+        .demo-box .demo-title svg { opacity:0.4; }
+        .demo-box .demo-row {
+            display:flex; align-items:center; gap:8px;
+            font-size:0.73rem; color:var(--neutral-500); margin-bottom:6px;
+        }
+        .demo-box .demo-row:last-child { margin-bottom:0; }
+        .role-tag {
+            display:inline-flex; align-items:center; justify-content:center;
+            padding:2px 8px; border-radius:5px; font-size:0.62rem;
+            font-weight:700; min-width:48px; letter-spacing:0.01em;
+        }
+        .role-tag.s { background:#ede9fe; color:#6d28d9; }
+        .role-tag.m { background:#dbeafe; color:#1d4ed8; }
+        .role-tag.a { background:#fce7f3; color:#be185d; }
+        .demo-box .creds { font-family:'SF Mono',Consolas,monospace; font-size:0.68rem; color:var(--neutral-500); }
+
+        .login-footer { text-align:center; margin-top:24px; font-size:0.8rem; color:var(--neutral-400); }
+        .login-footer a { color:var(--brand-600); font-weight:600; text-decoration:none; }
+        .login-footer a:hover { text-decoration:underline; }
+
+        .back-link {
+            display:inline-flex; align-items:center; gap:6px;
+            font-size:0.78rem; color:var(--neutral-400); text-decoration:none;
+            margin-bottom:20px; transition:color 0.2s;
+        }
+        .back-link:hover { color:var(--brand-600); }
+
+        .dark-toggle-fixed {
+            position:fixed; top:16px; right:16px; z-index:200;
+            width:36px; height:36px; border-radius:10px;
+            border:1px solid var(--border); background:var(--surface);
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; font-size:0.9rem;
+            box-shadow:0 1px 4px rgba(0,0,0,0.06);
+            transition:all 0.2s;
+        }
+        .dark-toggle-fixed:hover { border-color:var(--brand-300); }
+
+        @media (max-width:480px) {
+            .login-card { padding:28px 24px 24px; }
+        }
+    </style>
+</head>
+<body>
+    <button class="dark-toggle-fixed" onclick="toggleDarkMode()" title="Toggle dark mode">&#x263E;</button>
+
+    <div class="login-wrapper">
+        <a href="index.html" class="back-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+            Back to home
+        </a>
+
+        <div class="login-header">
+            <div class="login-logo">AI<span>Learn</span></div>
+            <div class="login-subtitle">Personalized AI Learning Platform</div>
+        </div>
+
+        <div class="login-card">
+            <h2>Welcome Back</h2>
+            <p class="sub">Sign in to continue your learning journey.</p>
+
+            <div class="role-tabs">
+                <button class="role-tab active" data-role="student">Student</button>
+                <button class="role-tab" data-role="mentor">Mentor</button>
+                <button class="role-tab" data-role="admin">Admin</button>
+            </div>
+
+            <form id="login-form">
+                <input type="hidden" id="role" value="student">
+                <div class="field">
+                    <label>Email</label>
+                    <div class="input-wrap">
+                        <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-8.97 5.7a1.94 1.94 0 01-2.06 0L2 7"/></svg></span>
+                        <input type="email" id="email" placeholder="you@example.com" required autocomplete="email">
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Password</label>
+                    <div class="input-wrap">
+                        <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>
+                        <input type="password" id="password" placeholder="Enter your password" required autocomplete="current-password">
+                    </div>
+                </div>
+                <div class="row-between">
+                    <label style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--neutral-500);cursor:pointer">
+                        <input type="checkbox" style="width:14px;height:14px;accent-color:var(--brand-600)"> Remember me
+                    </label>
+                    <a href="#">Forgot password?</a>
+                </div>
+                <button type="submit" class="btn-primary" data-original-text="Sign In">Sign In</button>
+            </form>
+
+            <div class="divider">or continue with</div>
+
+            <button id="google-signin-btn" class="btn-google">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                Sign in with Google
+            </button>
+
+            <div class="demo-box">
+                <div class="demo-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                    Demo Credentials
+                </div>
+                <div class="demo-row"><span class="role-tag s">Student</span><span class="creds">student@system.com / student123</span></div>
+                <div class="demo-row"><span class="role-tag m">Mentor</span><span class="creds">mentor@system.com / mentor123</span></div>
+                <div class="demo-row"><span class="role-tag a">Admin</span><span class="creds">admin@system.com / admin123</span></div>
+            </div>
+
+            <div class="login-footer">
+                Don't have an account? <a href="register.html">Create one</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="js/firebase_config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        document.querySelectorAll('.role-tab').forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.role-tab').forEach(function(t) { t.classList.remove('active'); });
+                tab.classList.add('active');
+                document.getElementById('role').value = tab.dataset.role;
+            });
+        });
+    </script>
+</body>
+</html>

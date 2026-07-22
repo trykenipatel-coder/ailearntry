@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Learning Analytics - AI Learning System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .als-hero { background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:var(--radius-lg);padding:32px 36px;color:white;margin-bottom:28px;position:relative;overflow:hidden; }
+        .als-hero::after { content:'';position:absolute;top:-60%;right:-15%;width:280px;height:280px;background:rgba(255,255,255,0.07);border-radius:50%; }
+        .als-hero h1 { font-size:1.4rem;margin:0 0 4px;position:relative;z-index:1;font-weight:700; }
+        .als-hero p { margin:0;opacity:0.85;font-size:0.8rem;position:relative;z-index:1; }
+
+        .als-ring-wrap { display:flex;align-items:center;justify-content:center;margin-bottom:28px; }
+        .als-ring-outer { width:140px;height:140px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;position:relative; }
+        .als-ring-inner { width:100px;height:100px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;background:var(--surface);box-shadow:0 2px 12px rgba(0,0,0,0.08);position:relative;z-index:1; }
+        body.dark .als-ring-inner { box-shadow:0 2px 12px rgba(0,0,0,0.4); }
+        .als-ring-inner .als-val { font-size:2rem;font-weight:800;line-height:1; }
+        .als-ring-inner .als-lbl { font-size:0.6rem;color:var(--neutral-500);margin-top:2px; }
+
+        .metric-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:28px; }
+        .metric-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center; }
+        .metric-card .m-val { font-size:1.4rem;font-weight:700;color:var(--brand-600); }
+        body.dark .metric-card .m-val { color:var(--brand-400); }
+        .metric-card .m-lbl { font-size:0.65rem;color:var(--neutral-500);margin-top:4px; }
+
+        .chart-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px; }
+        .chart-card h3 { font-size:0.85rem;margin:0 0 16px;color:var(--neutral-800);font-weight:600; }
+
+        .topic-bar { display:flex;align-items:center;gap:12px;margin-bottom:10px; }
+        .topic-bar .t-name { width:140px;font-size:0.72rem;font-weight:500;text-align:right;flex-shrink:0;color:var(--neutral-700); }
+        body.dark .topic-bar .t-name { color:var(--neutral-500); }
+        .topic-bar .t-bar-bg { flex:1;height:22px;background:var(--neutral-100);border-radius:11px;overflow:hidden;position:relative; }
+        .topic-bar .t-bar-fill { height:100%;border-radius:11px;transition:width 0.6s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:8px; }
+        .topic-bar .t-pct { font-size:0.62rem;font-weight:700;color:white; }
+
+        .weak-strong { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px; }
+        .ws-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px; }
+        .ws-card h4 { font-size:0.8rem;margin:0 0 12px;font-weight:600; }
+        .ws-item { display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--neutral-100);font-size:0.75rem; }
+        .ws-item:last-child { border:none; }
+        .ws-item .ws-pct { font-weight:600; }
+
+        .formula-box { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:24px; }
+        .formula-box h4 { font-size:0.8rem;margin:0 0 10px;color:var(--neutral-800);font-weight:600; }
+        .formula-box code { background:var(--neutral-100);padding:3px 8px;border-radius:5px;font-size:0.68rem;display:inline-block;margin:2px 0;font-family:'Inter',sans-serif;color:var(--brand-600);font-weight:500; }
+        body.dark .formula-box code { background:var(--neutral-100);color:var(--brand-400); }
+        .formula-box .sub { font-size:0.68rem;color:var(--neutral-500);margin-top:8px; }
+
+        @media(max-width:768px) { .weak-strong { grid-template-columns:1fr; } .metric-grid { grid-template-columns:repeat(2,1fr); } }
+    </style>
+</head>
+<body>
+    <nav class="navbar" id="mainNav">
+        <a href="../index.html" class="logo">AI<span>Learn</span></a>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="dashboard.html">Dashboard</a></li>
+        </ul>
+    </nav>
+
+    <main class="container dashboard">
+        <div class="als-hero">
+            <h1>Adaptive Learning Analytics</h1>
+            <p>Research-oriented personalized learning powered by the Adaptive Learning Score (ALS) algorithm</p>
+        </div>
+
+        <div id="als-loading" class="loading"><div class="spinner"></div>Loading analytics...</div>
+        <div id="als-content" class="hidden">
+
+            <div class="als-ring-wrap">
+                <div class="als-ring-outer" id="als-ring" style="background:conic-gradient(#6366f1 0deg, #e2e8f0 0deg)">
+                    <div class="als-ring-inner">
+                        <div class="als-val" id="als-value">--</div>
+                        <div class="als-lbl">ALS Score</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metric-grid" id="metrics-grid"></div>
+
+            <div class="formula-box">
+                <h4>Adaptive Learning Score (ALS) Formula</h4>
+                <div>
+                    <code>40% Accuracy</code>
+                    <code>25% Response Time</code>
+                    <code>20% Topic Mastery</code>
+                    <code>10% Streak</code>
+                    <code>5% Hint Usage</code>
+                </div>
+                <div class="sub">ALS >= 85: Hard | 70-84: Medium | Below 70: Easy</div>
+            </div>
+
+            <div class="chart-card">
+                <h3>ALS Score History</h3>
+                <canvas id="als-chart" height="200"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <h3>Learning Curve</h3>
+                <canvas id="learning-curve-chart" height="200"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <h3>Difficulty Progression</h3>
+                <canvas id="difficulty-chart" height="200"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <h3>Topic Mastery Profile</h3>
+                <div id="topic-mastery-bars"></div>
+            </div>
+
+            <div class="weak-strong">
+                <div class="ws-card">
+                    <h4 style="color:#ef4444">Weak Topics</h4>
+                    <div id="weak-topics"></div>
+                </div>
+                <div class="ws-card">
+                    <h4 style="color:#22c55e">Strong Topics</h4>
+                    <div id="strong-topics"></div>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>Improvement Trend</h3>
+                <div id="improvement-trend"></div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="../js/auth.js"></script>
+    <script>
+    (async function() {
+        const auth = await checkAuth();
+        if (!auth || auth.role !== 'student') { window.location.href = '../login.html'; return; }
+
+        var isDark = document.body.classList.contains('dark');
+        var gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+        var tickColor = isDark ? '#8899b0' : '#64748b';
+
+        try {
+            const result = await apiRequest('/api/adaptive/analytics');
+            if (!result.success || !result.data) {
+                document.getElementById('als-loading').innerHTML = '<div style="text-align:center;padding:40px;color:var(--neutral-400)">Complete some quizzes to see adaptive learning analytics.</div>';
+                return;
+            }
+            const d = result.data;
+
+            document.getElementById('als-loading').classList.add('hidden');
+            document.getElementById('als-content').classList.remove('hidden');
+
+            // ALS Ring — use conic-gradient with degree-based syntax
+            var als = d.als_history && d.als_history.length > 0 ? d.als_history[d.als_history.length - 1].als : 50;
+            var angle = als * 3.6;
+            var ringColor = als >= 70 ? '#22c55e' : als >= 50 ? '#f59e0b' : '#ef4444';
+            var ring = document.getElementById('als-ring');
+            ring.style.background = 'conic-gradient(' + ringColor + ' ' + angle + 'deg, var(--neutral-200) ' + angle + 'deg)';
+            document.getElementById('als-value').textContent = Math.round(als);
+            document.getElementById('als-value').style.color = ringColor;
+
+            // Metrics
+            var metricsHtml = '';
+            var metrics = [
+                { val: (d.overall_accuracy || 0).toFixed(1) + '%', lbl: 'Overall Accuracy' },
+                { val: d.total_questions_attempted || 0, lbl: 'Questions Attempted' },
+                { val: (d.avg_response_time || 0).toFixed(1) + 's', lbl: 'Avg Response Time' },
+                { val: d.streak_current || 0, lbl: 'Current Streak' },
+                { val: d.streak_longest || 0, lbl: 'Longest Streak' },
+                { val: (d.topic_mastery || []).length, lbl: 'Topics Covered' },
+            ];
+            metrics.forEach(function(m) {
+                metricsHtml += '<div class="metric-card"><div class="m-val">' + m.val + '</div><div class="m-lbl">' + m.lbl + '</div></div>';
+            });
+            document.getElementById('metrics-grid').innerHTML = metricsHtml;
+
+            // Shared chart options
+            var sharedOpts = {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, max: 100, grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 10 } } },
+                    x: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 10 }, maxRotation: 45 } }
+                }
+            };
+
+            // ALS History Chart
+            if (d.als_history && d.als_history.length > 0) {
+                new Chart(document.getElementById('als-chart'), {
+                    type: 'line',
+                    data: {
+                        labels: d.als_history.map(function(h) { return (h.date || '').substring(5, 10); }),
+                        datasets: [{
+                            label: 'ALS Score',
+                            data: d.als_history.map(function(h) { return h.als; }),
+                            borderColor: '#6366f1',
+                            backgroundColor: isDark ? 'rgba(99,102,241,0.15)' : 'rgba(99,102,241,0.08)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#6366f1',
+                            borderWidth: 2,
+                        }]
+                    },
+                    options: JSON.parse(JSON.stringify(sharedOpts))
+                });
+            }
+
+            // Learning Curve
+            if (d.learning_curve && d.learning_curve.length > 0) {
+                new Chart(document.getElementById('learning-curve-chart'), {
+                    type: 'line',
+                    data: {
+                        labels: d.learning_curve.map(function(l) { return (l.date || '').substring(5, 10); }),
+                        datasets: [{
+                            label: 'Accuracy %',
+                            data: d.learning_curve.map(function(l) { return l.accuracy; }),
+                            borderColor: '#22c55e',
+                            backgroundColor: isDark ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.08)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#22c55e',
+                            borderWidth: 2,
+                        }]
+                    },
+                    options: JSON.parse(JSON.stringify(sharedOpts))
+                });
+            }
+
+            // Difficulty Progression
+            if (d.difficulty_progression && d.difficulty_progression.length > 0) {
+                var diffColors = { Easy: '#22c55e', Medium: '#f59e0b', Hard: '#ef4444' };
+                new Chart(document.getElementById('difficulty-chart'), {
+                    type: 'bar',
+                    data: {
+                        labels: d.difficulty_progression.map(function(p) { return (p.date || '').substring(5, 10); }),
+                        datasets: [{
+                            label: 'Difficulty Level',
+                            data: d.difficulty_progression.map(function(p) { return p.count || 1; }),
+                            backgroundColor: d.difficulty_progression.map(function(p) { return diffColors[p.difficulty] || '#6366f1'; }),
+                            borderRadius: 4,
+                        }]
+                    },
+                    options: JSON.parse(JSON.stringify(sharedOpts))
+                });
+            }
+
+            // Topic Mastery Bars
+            if (d.topic_mastery && d.topic_mastery.length > 0) {
+                var barsHtml = '';
+                d.topic_mastery.forEach(function(t) {
+                    var color = t.mastery_pct >= 70 ? '#22c55e' : t.mastery_pct >= 40 ? '#f59e0b' : '#ef4444';
+                    barsHtml += '<div class="topic-bar">' +
+                        '<div class="t-name">' + t.topic + '</div>' +
+                        '<div class="t-bar-bg"><div class="t-bar-fill" style="width:' + t.mastery_pct + '%;background:' + color + '">' +
+                        '<span class="t-pct">' + t.mastery_pct.toFixed(0) + '%</span></div></div></div>';
+                });
+                document.getElementById('topic-mastery-bars').innerHTML = barsHtml;
+            }
+
+            // Weak & Strong Topics
+            var weakHtml = '';
+            (d.weak_topics || []).forEach(function(t) {
+                weakHtml += '<div class="ws-item"><span>' + t.topic + '</span><span class="ws-pct" style="color:#ef4444">' + t.mastery_pct.toFixed(0) + '%</span></div>';
+            });
+            document.getElementById('weak-topics').innerHTML = weakHtml || '<div style="color:var(--neutral-400);font-size:0.72rem;padding:12px 0;text-align:center">No weak topics identified yet.</div>';
+
+            var strongHtml = '';
+            (d.strong_topics || []).forEach(function(t) {
+                strongHtml += '<div class="ws-item"><span>' + t.topic + '</span><span class="ws-pct" style="color:#22c55e">' + t.mastery_pct.toFixed(0) + '%</span></div>';
+            });
+            document.getElementById('strong-topics').innerHTML = strongHtml || '<div style="color:var(--neutral-400);font-size:0.72rem;padding:12px 0;text-align:center">No strong topics identified yet.</div>';
+
+            // Improvement Trend
+            var trend = d.improvement_trend || {};
+            var isImproving = trend.improving === true;
+            var trendBg = isImproving ? (isDark ? 'linear-gradient(135deg,#052e16,#064e3b)' : 'linear-gradient(135deg,#f0fdf4,#dcfce7)') : (isDark ? 'linear-gradient(135deg,#450a0a,#7f1d1d)' : 'linear-gradient(135deg,#fef2f2,#fee2e2)');
+            var trendColor = isImproving ? '#22c55e' : '#ef4444';
+            var trendHtml = '<div style="display:flex;align-items:center;gap:14px;padding:18px 20px;background:' + trendBg + ';border-radius:var(--radius)">' +
+                '<div style="width:42px;height:42px;border-radius:50%;background:' + trendColor + '20;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">' + (isImproving ? '\u2197' : '\u2198') + '</div>' +
+                '<div><div style="font-size:0.85rem;font-weight:600;color:' + trendColor + '">' +
+                (isImproving ? 'Improving' : 'Needs Attention') + '</div>' +
+                '<div style="font-size:0.72rem;color:var(--neutral-500);margin-top:2px">Change: ' + (trend.change_pct > 0 ? '+' : '') + (trend.change_pct || 0).toFixed(1) + '%</div></div></div>';
+            document.getElementById('improvement-trend').innerHTML = trendHtml;
+
+        } catch (e) {
+            console.error('Analytics error:', e);
+            document.getElementById('als-loading').innerHTML = '<div style="text-align:center;padding:40px;color:var(--neutral-400)">Failed to load analytics.</div>';
+        }
+    })();
+    </script>
+</body>
+</html>
