@@ -29,27 +29,28 @@ FRONTEND_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fronten
 UPLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads", "study_materials")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-_startup_start = time.time()
+_db_initialized = False
 
-with app.app_context():
-    _db_start = time.time()
-    init_db()
-    print(f"[Startup] DB init: {time.time()-_db_start:.1f}s")
+def _ensure_db():
+    global _db_initialized
+    if _db_initialized:
+        return
+    _db_initialized = True
+    with app.app_context():
+        init_db()
+        seed_sample_data()
+        seed_demo_dsa_quiz()
+        seed_demo_python_quiz()
+        seed_python_basics_quiz()
+        seed_demo_student_results()
+        seed_demo_scorecards()
+        seed_adaptive_demo_data()
+        seed_prs_ere_demo_data()
+        seed_demo_interventions()
+        seed_demo_feature_quiz()
+        print("[Startup] DB initialized and seeded")
 
-    _seed_start = time.time()
-    seed_sample_data()
-    seed_demo_dsa_quiz()
-    seed_demo_python_quiz()
-    seed_python_basics_quiz()
-    seed_demo_student_results()
-    seed_demo_scorecards()
-    seed_adaptive_demo_data()
-    seed_prs_ere_demo_data()
-    seed_demo_interventions()
-    seed_demo_feature_quiz()
-    print(f"[Startup] Seeding: {time.time()-_seed_start:.1f}s")
-
-print(f"[Startup] Total startup: {time.time()-_startup_start:.1f}s")
+_ensure_db()
 
 
 @app.route("/")
