@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - AI Learning System</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="logo-text">AI<span>Learn</span></div>
+            <h1>{{ 'Create Account' if request.path == '/register' else 'Welcome Back' }}</h1>
+            <p class="subtitle">{{ 'Sign up to get started with personalized learning.' if request.path == '/register' else 'Log in to continue your learning journey.' }}</p>
+
+            <div class="role-tabs">
+                <div class="role-tab active" data-role="student" onclick="switchTab('student')">Student</div>
+                <div class="role-tab" data-role="mentor" onclick="switchTab('mentor')">Mentor</div>
+                <div class="role-tab" data-role="admin" onclick="switchTab('admin')">Admin</div>
+            </div>
+
+            {% if request.path == '/register' %}
+            <form id="register-form">
+                <input type="hidden" id="role" value="student">
+
+                <div class="form-group">
+                    <label id="name-label">Full Name</label>
+                    <input type="text" id="name" placeholder="Enter your name" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" placeholder="Enter your email" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="Create a password" required minlength="6">
+                </div>
+
+                <div class="form-group" id="course-field">
+                    <label>Course</label>
+                    <input type="text" id="course" placeholder="e.g. Computer Science">
+                </div>
+
+                <div class="form-group" id="subject-field" style="display:none">
+                    <label>Subject Specialization</label>
+                    <input type="text" id="subject" placeholder="e.g. Mathematics">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg" data-original-text="Create Account">Create Account</button>
+
+                <p style="text-align:center;margin-top:16px;font-size:0.9rem;color:var(--text-light)">
+                    Already have an account? <a href="/login" style="color:var(--primary);font-weight:600">Login</a>
+                </p>
+            </form>
+            {% else %}
+            <form id="login-form">
+                <input type="hidden" id="role" value="student">
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" placeholder="Enter your email" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg" data-original-text="Login">Login</button>
+
+                <p style="text-align:center;margin-top:16px;font-size:0.9rem;color:var(--text-light)">
+                    Don't have an account? <a href="/register" style="color:var(--primary);font-weight:600">Register</a>
+                </p>
+            </form>
+            {% endif %}
+
+            <div style="margin-top:16px;padding:12px;background:#f8fafc;border-radius:8px;font-size:0.8rem;color:var(--text-light)">
+                <strong>Demo Credentials:</strong><br>
+                Student: student@system.com / student123<br>
+                Mentor: mentor@system.com / mentor123<br>
+                Admin: admin@system.com / admin123
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/auth.js"></script>
+</body>
+</html>

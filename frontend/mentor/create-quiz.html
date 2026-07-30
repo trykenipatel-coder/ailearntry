@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Quiz - AI Learning System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-primary">
+    <nav class="navbar" id="mainNav">
+        <a href="../index.html" class="logo">AI<span>Learn</span></a>
+        <ul class="nav-links" id="navLinks"></ul>
+    </nav>
+
+    <main class="container dashboard">
+        <div class="dashboard-header">
+            <h1>Create Quiz Manually</h1>
+            <p>Design your own quiz with custom questions.</p>
+        </div>
+
+        <div class="card" id="manual-quiz-form">
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Quiz Topic</label>
+                    <input type="text" id="quiz-topic" placeholder="e.g. Human Digestive System" required>
+                </div>
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text" id="quiz-subject" placeholder="e.g. Science">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Difficulty Level</label>
+                <select id="quiz-difficulty">
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                    <option value="Mixed">Mixed</option>
+                </select>
+            </div>
+
+            <div style="margin:20px 0;padding:20px;border:1.5px solid #e5e7eb;border-radius:12px;background:#f8fafc">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:#6366f1"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <span style="font-size:0.85rem;font-weight:700;color:#18181b">Advanced Settings</span>
+                    <span style="font-size:0.65rem;color:#94a3b8;font-weight:500">(Optional)</span>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:16px">
+                    <label style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:12px 16px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;transition:all .2s">
+                        <input type="checkbox" id="allow-skip" style="width:18px;height:18px;accent-color:#6366f1">
+                        <div>
+                            <div style="font-size:0.82rem;font-weight:600;color:#18181b">Allow Skip Questions</div>
+                            <div style="font-size:0.7rem;color:#94a3b8;margin-top:2px">Students can skip questions and revisit them later in review mode.</div>
+                        </div>
+                    </label>
+
+                    <label style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:12px 16px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;transition:all .2s">
+                        <input type="checkbox" id="allow-jump" style="width:18px;height:18px;accent-color:#6366f1">
+                        <div>
+                            <div style="font-size:0.82rem;font-weight:600;color:#18181b">Allow Jump Navigation</div>
+                            <div style="font-size:0.7rem;color:#94a3b8;margin-top:2px">Students can jump directly to any question using the question grid.</div>
+                        </div>
+                    </label>
+
+                    <div style="padding:12px 16px;border:1px solid #e5e7eb;border-radius:10px;background:#fff">
+                        <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
+                            <input type="checkbox" id="enable-nav-lock" style="width:18px;height:18px;accent-color:#6366f1">
+                            <div>
+                                <div style="font-size:0.82rem;font-weight:600;color:#18181b">Enable Navigation Time Lock</div>
+                                <div style="font-size:0.7rem;color:#94a3b8;margin-top:2px">Lock navigation for X seconds when a new question opens.</div>
+                            </div>
+                        </label>
+                        <div style="margin-top:12px;padding-left:30px;display:flex;align-items:center;gap:8px">
+                            <label style="font-size:0.75rem;color:#64748b;font-weight:500">Lock duration:</label>
+                            <select id="nav-lock-seconds" style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:0.78rem;font-family:inherit;background:#f8fafc" disabled>
+                                <option value="3">3 seconds</option>
+                                <option value="5">5 seconds</option>
+                                <option value="7" selected>7 seconds</option>
+                                <option value="10">10 seconds</option>
+                                <option value="15">15 seconds</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin:20px 0">
+                <h3>Questions</h3>
+                <button type="button" class="btn btn-success" onclick="addQuestion()">+ Add Question</button>
+            </div>
+
+            <div id="questions-container"></div>
+
+            <button type="button" class="btn btn-primary btn-block btn-lg" onclick="submitManualQuiz()" style="margin-top:20px">Create Quiz</button>
+        </div>
+    </main>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/mentor.js"></script>
+    <script>
+    addQuestion();
+    document.getElementById('enable-nav-lock').addEventListener('change', function() {
+        document.getElementById('nav-lock-seconds').disabled = !this.checked;
+    });
+    </script>
+</body>
+</html>

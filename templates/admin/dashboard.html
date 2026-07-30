@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Admin Dashboard</h1>
+    <p>System overview and platform statistics.</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="label">Total Students</div>
+        <div class="value" id="total-students">-</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Total Mentors</div>
+        <div class="value" id="total-mentors">-</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Total Quizzes</div>
+        <div class="value" id="total-quizzes">-</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Total Attempts</div>
+        <div class="value" id="total-attempts">-</div>
+    </div>
+</div>
+
+<div class="grid-3" style="margin-bottom:24px">
+    <div class="card">
+        <div class="card-header">
+            Pass/Fail Ratio
+            <span class="badge badge-info">All Time</span>
+        </div>
+        <div id="pass-fail-stats">
+            <div class="chart-placeholder">Loading...</div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            Difficulty Analysis
+            <span class="badge badge-info">By Level</span>
+        </div>
+        <div id="difficulty-analysis">
+            <div class="chart-placeholder">Loading...</div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            Daily Activity
+            <span class="badge badge-info">7 Days</span>
+        </div>
+        <div id="daily-activity">
+            <div class="chart-placeholder">Loading...</div>
+        </div>
+    </div>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <div class="card-header">Recent Students <a href="/admin/manage-students" class="btn btn-sm btn-outline">View All</a></div>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Name</th><th>Email</th><th>Course</th><th>Registered</th></tr></thead>
+                <tbody id="recent-students"></tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">Recent Mentors <a href="/admin/manage-mentors" class="btn btn-sm btn-outline">View All</a></div>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Name</th><th>Email</th><th>Subject</th></tr></thead>
+                <tbody id="recent-mentors"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/admin.js"></script>
+<script>loadAdminDashboard();</script>
+{% endblock %}

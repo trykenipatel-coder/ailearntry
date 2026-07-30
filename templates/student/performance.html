@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Performance Analytics{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Performance Analytics</h1>
+    <p>Topic-wise analysis and learning insights.</p>
+</div>
+
+<div class="card" style="margin-bottom:20px">
+    <div class="card-header">Topic-wise Performance</div>
+    <div id="topic-analysis"></div>
+</div>
+
+<div class="card">
+    <div class="card-header">Recommendations</div>
+    <div id="recommendations">
+        <div class="alert alert-info">
+            Complete more quizzes to get personalized learning recommendations.
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/student.js"></script>
+<script>loadPerformance();</script>
+{% endblock %}

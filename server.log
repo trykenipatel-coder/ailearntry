@@ -1,0 +1,22 @@
+[AI] API Key present: True
+[AI] Testing model openrouter/free: 200
+[AI] OpenRouter connected with model: openrouter/free
+[Seed] Created DEMO2026 for Python quiz
+[Startup] AI Status: Connected (openrouter/free)
+[Firebase] Initialized and connected successfully
+[Startup] Firebase available: True
+[Firebase Sync] Error: Timeout of 60.0s exceeded, last exception: 429 Quota exceeded.
+[Startup] Firebase sync timed out (10s) - skipping
+============================================================
+  AI Personalized Learning System
+  Starting server at http://localhost:5000
+============================================================
+
+  Demo Credentials:
+  Student: student@system.com / student123
+  Mentor:  mentor@system.com / mentor123
+  Admin:   admin@system.com / admin123
+
+============================================================
+ * Serving Flask app 'app'
+ * Debug mode: off

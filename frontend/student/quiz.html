@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Take Quiz - AI Learning System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .quiz-lockdown { user-select:none; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; }
+        .quiz-lockdown * { user-select:none; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; }
+        .quiz-lockdown input, .quiz-lockdown textarea { user-select:text; -webkit-user-select:text; -moz-user-select:text; -ms-user-select:text; }
+        .security-bar-enhanced { background:linear-gradient(135deg,#0f172a,#1e293b); border-radius:var(--radius-md); padding:16px 20px; margin-bottom:20px; color:white; }
+        .security-bar-enhanced .sec-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+        .security-bar-enhanced .sec-header .shield { width:32px;height:32px;background:rgba(99,102,241,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem; }
+        .security-bar-enhanced .sec-header h3 { color:white; font-size:0.875rem; margin:0; }
+        .security-bar-enhanced .sec-header .live-badge { margin-left:auto; padding:3px 10px; background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.3); border-radius:var(--radius-full); font-size:0.65rem; color:#86efac; font-weight:600; }
+        .security-bar-enhanced .sec-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:6px; }
+        .security-bar-enhanced .sec-grid .sec-item { display:flex; align-items:center; gap:6px; padding:5px 10px; border-radius:var(--radius-sm); font-size:0.7rem; color:rgba(255,255,255,0.6); background:rgba(255,255,255,0.04); }
+        .security-bar-enhanced .sec-grid .sec-item.active { color:rgba(255,255,255,0.9); background:rgba(99,102,241,0.12); }
+        .security-bar-enhanced .sec-grid .sec-item .dot { width:6px;height:6px;border-radius:50%;flex-shrink:0; }
+        .security-bar-enhanced .sec-grid .sec-item.active .dot { background:#22c55e; box-shadow:0 0 6px rgba(34,197,94,0.5); }
+        .security-bar-enhanced .sec-grid .sec-item .dot.inactive { background:var(--neutral-500); }
+        body.dark #nav-lock-bar { background:linear-gradient(135deg,rgba(245,158,11,0.12),rgba(245,158,11,0.06));border-color:rgba(245,158,11,0.25);color:#fbbf24; }
+        body.dark #nav-lock-msg { color:#f87171; }
+        .camera-widget { position:fixed; bottom:20px; right:20px; z-index:1000; transition:all .3s; }
+        .camera-widget.minimized .camera-preview-box { width:48px; height:48px; border-radius:50%; overflow:hidden; }
+        .camera-widget.minimized video { display:none; }
+        .camera-widget.minimized .camera-status-bar { display:none; }
+        .camera-widget.minimized .cam-minimize { top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;width:36px;height:36px;padding:0;display:flex;align-items:center;justify-content:center; }
+        .camera-preview-box { width:180px; border-radius:12px; overflow:hidden; border:2px solid var(--brand-500); box-shadow:0 8px 32px rgba(0,0,0,.3); background:#1a1b26; position:relative; transition:all .3s; }
+        .camera-preview-box video { width:100%; display:block; border-radius:10px; }
+        .camera-status-bar { position:absolute; bottom:0; left:0; right:0; padding:6px 10px; background:rgba(0,0,0,.7); display:flex; align-items:center; gap:6px; }
+        .camera-status-bar .cam-dot { width:6px; height:6px; border-radius:50%; background:#22c55e; animation:pulse 2s infinite; }
+        .camera-status-bar .cam-dot.capturing { background:#3b82f6; animation:captureFlash .3s; }
+        @keyframes captureFlash { 0%{transform:scale(1)} 50%{transform:scale(2);background:#fff} 100%{transform:scale(1)} }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+        @keyframes spin { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
+        .camera-status-bar .cam-label { font-size:10px; color:rgba(255,255,255,.8); font-weight:500; }
+        .cam-minimize { position:absolute; top:6px; right:6px; width:20px; height:20px; border-radius:4px; border:none; background:rgba(0,0,0,.5); color:#fff; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:2; transition:background .15s; }
+        .cam-minimize:hover { background:rgba(0,0,0,.8); }
+        .camera-warning { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(239,68,68,.95); color:#fff; padding:24px 32px; border-radius:16px; z-index:2000; text-align:center; box-shadow:0 16px 48px rgba(0,0,0,.4); display:none; }
+        .camera-warning h3 { font-size:16px; margin-bottom:8px; }
+        .camera-warning p { font-size:13px; opacity:.9; }
+        .camera-capture-flash { position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none; border-radius:10px; transition:opacity .1s; }
+        .camera-capture-flash.active { opacity:.6; }
+
+        /* Question Nav Grid */
+        .qn-btn {
+            width:32px; height:32px; border-radius:8px; border:1.5px solid #e5e7eb;
+            background:#fff; font-size:0.72rem; font-weight:600; color:#64748b;
+            cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center;
+        }
+        .qn-btn:hover { border-color:#6366f1; color:#6366f1; transform:scale(1.1); }
+        .qn-btn.qn-current { background:#6366f1; color:#fff; border-color:#6366f1; box-shadow:0 2px 8px rgba(99,102,241,.3); }
+        .qn-btn.qn-answered { background:#d1fae5; color:#059669; border-color:#6ee7b7; }
+        .qn-btn.qn-skipped { background:#fef3c7; color:#d97706; border-color:#fde68a; }
+        body.dark .qn-btn { background:#1e293b; border-color:rgba(255,255,255,.1); color:#94a3b8; }
+        body.dark .qn-btn:hover { border-color:#818cf8; color:#818cf8; }
+        body.dark .qn-btn.qn-current { background:#6366f1; color:#fff; border-color:#6366f1; }
+        body.dark .qn-btn.qn-answered { background:rgba(34,197,94,.15); color:#4ade80; border-color:rgba(34,197,94,.3); }
+        body.dark .qn-btn.qn-skipped { background:rgba(245,158,11,.15); color:#fbbf24; border-color:rgba(245,158,11,.3); }
+        #question-nav-grid { background:var(--surface-2); border-color:var(--border); }
+    </style>
+</head>
+<body class="quiz-lockdown">
+    <nav class="navbar" id="mainNav">
+        <a href="../index.html" class="logo">AI<span>Learn</span></a>
+        <ul class="nav-links" id="navLinks"></ul>
+    </nav>
+
+    <main class="container dashboard">
+        <div class="quiz-container">
+            <div id="code-entry-screen">
+                <div class="card" style="text-align:center;padding:48px;max-width:480px;margin:0 auto">
+                    <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--brand-50),#eef2ff);margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--brand-500)" stroke-width="1.5" style="width:32px;height:32px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                    <h2 style="margin-bottom:8px">Enter Access Code</h2>
+                    <p style="color:var(--text-light);margin:0 0 20px;font-size:0.85rem">Please enter the access code provided by your mentor to start this quiz.</p>
+                    <div id="re-entry-hint" style="display:none"></div>
+                    <div id="code-error" class="alert alert-danger hidden" style="margin-bottom:16px;font-size:0.8rem"></div>
+                    <input type="text" id="access-code-input" placeholder="Enter access code (e.g. ABC12345)"
+                        style="width:100%;max-width:300px;padding:14px 20px;border:2px solid var(--border);border-radius:var(--radius);font-size:1.2rem;font-weight:700;letter-spacing:.15em;text-align:center;text-transform:uppercase;font-family:'SF Mono',monospace;margin-bottom:20px">
+                    <div>
+                        <button class="btn btn-primary btn-lg" onclick="validateAndStart()" id="validate-code-btn">Validate & Start</button>
+                    </div>
+                    <p style="color:var(--text-light);font-size:0.7rem;margin-top:16px">Don't have a code? Contact your mentor.</p>
+                </div>
+            </div>
+
+            <div id="already-completed-screen" class="hidden">
+                <div class="card" style="text-align:center;padding:60px 48px;max-width:500px;margin:0 auto">
+                    <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#fef2f2,#fee2e2);margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--red-500)" stroke-width="1.5" style="width:32px;height:32px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                    </div>
+                    <h2 style="margin-bottom:12px;color:var(--red-600)">Quiz Already Completed</h2>
+                    <p style="color:var(--text-light);font-size:0.9rem;line-height:1.7;margin-bottom:24px">This quiz has already been completed. You cannot access it again unless another attempt is allowed according to the mentor's attempt limit or a valid Backup Access Code is provided.</p>
+                    <a href="dashboard.html" class="btn btn-primary">Back to Dashboard</a>
+                </div>
+            </div>
+
+            <div id="camera-setup-screen" class="hidden">
+                <div class="card" style="text-align:center;padding:48px;max-width:480px;margin:0 auto">
+                    <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#ecfdf5,#d1fae5);margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="1.5" style="width:32px;height:32px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    </div>
+                    <h2 style="margin-bottom:8px">Face Verification Required</h2>
+                    <p style="color:var(--text-light);margin:0 0 20px;font-size:0.85rem;line-height:1.6">This quiz is proctored. Please enable your camera and verify your face before starting.</p>
+
+                    <!-- Step indicators -->
+                    <div style="display:flex;justify-content:center;gap:8px;margin-bottom:24px">
+                        <div id="step1-dot" style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--brand-500)">
+                            <span style="width:20px;height:20px;border-radius:50%;background:var(--brand-500);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px">1</span> Camera
+                        </div>
+                        <div style="color:var(--text-tertiary);font-size:11px;display:flex;align-items:center">→</div>
+                        <div id="step2-dot" style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--text-tertiary)">
+                            <span id="step2-circle" style="width:20px;height:20px;border-radius:50%;background:var(--neutral-200);color:var(--text-tertiary);display:flex;align-items:center;justify-content:center;font-size:10px">2</span> Face Verify
+                        </div>
+                    </div>
+
+                    <div id="camera-preview-box" style="width:240px;height:180px;border-radius:12px;background:#1a1b26;margin:0 auto 20px;overflow:hidden;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;position:relative">
+                        <video id="setupCamera" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:none;"></video>
+                        <img id="capturedFacePreview" style="width:100%;height:100%;object-fit:cover;display:none;" alt="Captured face">
+                        <canvas id="setupCanvas" style="display:none;"></canvas>
+                        <div id="camera-placeholder" style="text-align:center;color:var(--text-tertiary)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:40px;height:40px;margin-bottom:8px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                            <div style="font-size:12px">Camera preview will appear here</div>
+                        </div>
+                        <div id="camera-live-dot" style="position:absolute;top:8px;right:8px;display:none;align-items:center;gap:4px;padding:2px 8px;background:rgba(239,68,68,.85);border-radius:10px;font-size:10px;color:#fff;font-weight:600">
+                            <span style="width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 1.5s infinite"></span> LIVE
+                        </div>
+                    </div>
+
+                    <div id="camera-status-msg" style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;min-height:20px">
+                        Click the button below to enable your camera.
+                    </div>
+
+                    <!-- Step 1: Enable Camera -->
+                    <button class="btn btn-primary btn-lg" id="enable-cam-btn" onclick="enableSetupCamera()" style="min-width:200px">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:6px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                        Enable Camera
+                    </button>
+
+                    <!-- Step 2: Capture + Verify (hidden until camera active) -->
+                    <div id="face-verify-actions" style="display:none">
+                        <button class="btn btn-primary btn-lg" id="capture-face-btn" onclick="captureFaceForVerify()" style="min-width:200px">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:6px"><circle cx="12" cy="12" r="10"/></svg>
+                            Capture Face
+                        </button>
+                        <button class="btn btn-primary btn-lg" id="verify-face-btn" onclick="verifyFaceForQuiz()" style="min-width:200px;display:none">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:6px"><polyline points="20 6 9 17 4 12"/></svg>
+                            Verify & Start Quiz
+                        </button>
+                        <button class="btn btn-outline" id="retake-face-btn" onclick="retakeFaceForVerify()" style="display:none;margin-top:8px">Retake</button>
+                    </div>
+
+                    <div style="margin-top:16px">
+                        <button class="btn btn-outline" id="skip-cam-btn" onclick="skipCameraSetup()" style="font-size:12px;padding:8px 16px;display:none">Continue Without Camera</button>
+                    </div>
+
+                    <div id="camera-error-msg" style="display:none;margin-top:12px;padding:12px;border-radius:8px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);color:#dc2626;font-size:12px;text-align:left"></div>
+                </div>
+            </div>
+
+            <div id="start-screen" class="hidden">
+                <div class="card" style="text-align:center;padding:48px">
+                    <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--brand-50),#eef2ff);margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--brand-500)" stroke-width="1.5" style="width:32px;height:32px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <h2 id="quiz-title" style="margin-bottom:8px">Loading Quiz...</h2>
+                    <p style="color:var(--text-light);margin:0 0 8px">Read each question carefully and select the best answer.</p>
+                    <div style="max-width:400px;margin:16px auto 28px;padding:16px;background:var(--neutral-50);border-radius:var(--radius);font-size:0.75rem;color:var(--text-light);text-align:left;line-height:1.8">
+                        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> <strong>Browser Lockdown Active</strong></div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 16px;margin-top:8px">
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="var(--red-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Copy/Paste Blocked</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="var(--red-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Right-Click Blocked</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="var(--red-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Text Selection Disabled</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="var(--red-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Print Screen Blocked</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="var(--red-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>DevTools Blocked</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="var(--red-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Tab Switching Monitored</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="var(--amber-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:3px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Screenshot Detection Active</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Time Tracking Active</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="var(--amber-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:3px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Navigation Lock 7s</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-lg" id="start-quiz-btn" onclick="startQuiz()">Start Quiz</button>
+                </div>
+            </div>
+
+            <div id="quiz-screen" class="hidden">
+                <div id="security-bar"></div>
+                <div id="timer-display" class="quiz-timer">00:00</div>
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+
+                <div id="adaptive-explanation" style="display:none"></div>
+
+                <div class="question-card" style="user-select:none;-webkit-user-select:none">
+                    <div class="question-number">
+                        <span id="question-number">Question 1 of 5</span>
+                        <span class="badge badge-info" id="question-difficulty" style="margin-left:8px">Easy</span>
+                    </div>
+                    <div class="question-text" id="question-text">Loading question...</div>
+                    <div class="options-list" id="options-container"></div>
+                </div>
+
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <button class="btn btn-outline" id="prev-btn" onclick="prevQuestion()">Previous</button>
+                    <button class="btn btn-outline" id="skip-btn" onclick="skipQuestion()" style="display:none;border-color:#fde68a;color:#92400e;background:#fffbeb">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        Skip
+                    </button>
+                    <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()">Next Question</button>
+                </div>
+
+                <div id="question-nav-grid" style="display:none;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:12px;padding:12px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:var(--radius)"></div>
+
+                <div id="nav-lock-bar" style="display:none;align-items:center;justify-content:center;gap:8px;padding:10px 16px;margin-top:12px;background:linear-gradient(135deg,#fef3c7,#fef9c3);border:1px solid #fde68a;border-radius:var(--radius);font-size:0.75rem;color:#92400e">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>Navigation locked — please read the question carefully</span>
+                    <span style="font-weight:700;margin-left:4px" id="nav-lock-timer">7</span><span>s</span>
+                    <span id="nav-lock-msg" style="margin-left:8px"></span>
+                </div>
+            </div>
+
+            <div id="result-screen" class="hidden">
+                <div id="result-loading" class="loading"><div class="spinner"></div>Calculating your results...</div>
+                <div id="result-content" class="hidden">
+                    <div class="card result-highlight" style="text-align:center;padding:40px">
+                        <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#f0fdf4,#dcfce7);margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="var(--green-500)" stroke-width="1.5" style="width:32px;height:32px"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 5-5"/></svg>
+                        </div>
+                        <h2 style="margin-bottom:8px">Quiz Submitted Successfully!</h2>
+                        <p style="color:var(--text-light);margin:0 0 20px;font-size:0.9rem">Your responses have been saved successfully.</p>
+                        <p style="color:var(--text-light);margin:0 0 8px;font-size:0.85rem">Thank you for completing the quiz.</p>
+                        <div class="score" id="score-display">0%</div>
+                        <div class="status-text" id="status-text" style="margin-bottom:20px"></div>
+                        <div style="font-size:0.85rem;color:var(--neutral-400);margin-bottom:20px">
+                            Redirecting to Dashboard in <strong id="redirect-countdown">5</strong> seconds...
+                        </div>
+                        <div class="progress-bar" style="height:6px;max-width:300px;margin:0 auto 24px">
+                            <div class="progress-fill" id="redirect-progress" style="width:100%;background:var(--brand-400);height:6px;transition:width 1s linear"></div>
+                        </div>
+                        <a href="dashboard.html" class="btn btn-primary">Go to Dashboard Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="camera-widget" id="cameraWidget" style="display:none;">
+        <div class="camera-preview-box">
+            <video id="quizCamera" autoplay playsinline muted></video>
+            <div class="camera-capture-flash" id="captureFlash"></div>
+            <button class="cam-minimize" onclick="toggleCameraMinimize()" title="Minimize/Expand">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+            </button>
+            <div class="camera-status-bar">
+                <div class="cam-dot" id="camDot"></div>
+                <span class="cam-label" id="camLabel">Recording</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="camera-warning" id="cameraWarning">
+        <h3>⚠ Camera Alert</h3>
+        <p id="cameraWarningMsg">Please stay in frame</p>
+    </div>
+
+    <canvas id="quizCameraCanvas" style="display:none;"></canvas>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/student.js"></script>
+    <script>
+    let proctorSessionId = null;
+    let cameraStream = null;
+    let cameraInterval = null;
+    let lastEventTime = {};
+    let quizIdFromUrl = null;
+    let cameraMinimized = false;
+    let setupCameraStream = null;
+    let capturedFaceData = null;
+
+    function toggleCameraMinimize() {
+        cameraMinimized = !cameraMinimized;
+        document.getElementById("cameraWidget").classList.toggle("minimized", cameraMinimized);
+    }
+
+    async function enableSetupCamera() {
+        const btn = document.getElementById("enable-cam-btn");
+        const statusMsg = document.getElementById("camera-status-msg");
+        const errMsg = document.getElementById("camera-error-msg");
+        const skipBtn = document.getElementById("skip-cam-btn");
+
+        btn.disabled = true;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;animation:spin 1s linear infinite"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg> Requesting...';
+        statusMsg.textContent = 'Waiting for camera permission...';
+        errMsg.style.display = 'none';
+
+        try {
+            setupCameraStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "user", width: { ideal: 320 }, height: { ideal: 240 } }
+            });
+
+            const video = document.getElementById("setupCamera");
+            video.srcObject = setupCameraStream;
+            video.style.display = "block";
+            document.getElementById("capturedFacePreview").style.display = "none";
+            document.getElementById("camera-placeholder").style.display = "none";
+            document.getElementById("camera-live-dot").style.display = "flex";
+
+            statusMsg.innerHTML = '<span style="color:#16a34a;font-weight:600">Camera active!</span> Now capture your face for verification.';
+
+            // Hide enable button, show capture button
+            btn.style.display = "none";
+            document.getElementById("face-verify-actions").style.display = "";
+            document.getElementById("capture-face-btn").style.display = "";
+            document.getElementById("verify-face-btn").style.display = "none";
+            document.getElementById("retake-face-btn").style.display = "none";
+            skipBtn.style.display = "";
+
+            // Update step indicators
+            document.getElementById("step2-circle").style.background = "var(--brand-500)";
+            document.getElementById("step2-circle").style.color = "#fff";
+
+        } catch(e) {
+            console.log("Camera error:", e);
+            statusMsg.textContent = '';
+            errMsg.style.display = 'block';
+            var proto = window.location.protocol;
+            var host = window.location.host;
+            if (e.name === "NotAllowedError") {
+                errMsg.innerHTML = '<strong>Camera access denied.</strong><br>Please allow camera access in your browser settings and try again, or continue without camera.';
+            } else if (e.name === "NotFoundError") {
+                errMsg.innerHTML = '<strong>No camera found.</strong><br>Please connect a camera and try again, or continue without camera.';
+            } else if (proto === "file:" || !host.includes("localhost")) {
+                errMsg.innerHTML = '<strong>Camera requires localhost or HTTPS.</strong><br><br>You are on: <code>' + proto + '//' + host + '</code><br><br>Please access via:<br><code>http://localhost:5000/student/quiz.html?quiz_id=1</code>';
+            } else {
+                errMsg.innerHTML = '<strong>Camera error:</strong> ' + e.name + ' — ' + e.message;
+            }
+            btn.disabled = false;
+            btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:6px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Retry Camera';
+            btn.onclick = enableSetupCamera;
+            skipBtn.style.display = '';
+        }
+    }
+
+    function captureFaceForVerify() {
+        const video = document.getElementById("setupCamera");
+        const canvas = document.getElementById("setupCanvas");
+        canvas.width = video.videoWidth || 320;
+        canvas.height = video.videoHeight || 240;
+        canvas.getContext("2d").drawImage(video, 0, 0);
+        capturedFaceData = canvas.toDataURL("image/jpeg", 0.7);
+
+        // Show captured image, hide video
+        document.getElementById("capturedFacePreview").src = capturedFaceData;
+        document.getElementById("capturedFacePreview").style.display = "block";
+        video.style.display = "none";
+
+        // Stop camera
+        if (setupCameraStream) {
+            setupCameraStream.getTracks().forEach(t => t.stop());
+            setupCameraStream = null;
+        }
+        document.getElementById("camera-live-dot").style.display = "none";
+
+        // Show verify button, hide capture button
+        document.getElementById("capture-face-btn").style.display = "none";
+        document.getElementById("verify-face-btn").style.display = "";
+        document.getElementById("retake-face-btn").style.display = "";
+        document.getElementById("camera-status-msg").innerHTML = 'Face captured! Click <strong>Verify & Start Quiz</strong> to continue.';
+    }
+
+    function retakeFaceForVerify() {
+        capturedFaceData = null;
+        document.getElementById("capturedFacePreview").style.display = "none";
+        document.getElementById("verify-face-btn").style.display = "none";
+        document.getElementById("retake-face-btn").style.display = "none";
+        document.getElementById("capture-face-btn").style.display = "";
+        document.getElementById("camera-status-msg").textContent = "Retaking... click Capture when ready.";
+        enableSetupCamera();
+    }
+
+    async function verifyFaceForQuiz() {
+        if (!capturedFaceData) return;
+        const btn = document.getElementById("verify-face-btn");
+        btn.disabled = true;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;animation:spin 1s linear infinite"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg> Verifying...';
+        document.getElementById("camera-status-msg").textContent = "Verifying your face...";
+
+        try {
+            const r = await fetch("/api/proctoring/register-face", {
+                method: "POST", headers: {"Content-Type": "application/json"}, credentials: "include",
+                body: JSON.stringify({ photo: capturedFaceData })
+            });
+            const j = await r.json();
+            if (j.success) {
+                document.getElementById("camera-status-msg").innerHTML = '<span style="color:#16a34a;font-weight:600">Face verified!</span> Starting quiz...';
+                document.getElementById("step2-dot").style.color = "#16a34a";
+                document.getElementById("step2-circle").style.background = "#16a34a";
+                document.getElementById("step2-circle").innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+
+                setTimeout(() => goToStartScreen(), 1000);
+            } else {
+                document.getElementById("camera-status-msg").innerHTML = '<span style="color:#dc2626;font-weight:600">Verification failed.</span> ' + (j.message || 'Please try again.');
+                btn.disabled = false;
+                btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:6px"><polyline points="20 6 9 17 4 12"/></svg> Verify & Start Quiz';
+            }
+        } catch(e) {
+            document.getElementById("camera-status-msg").innerHTML = '<span style="color:#dc2626">Error: ' + e.message + '</span>';
+            btn.disabled = false;
+            btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:6px"><polyline points="20 6 9 17 4 12"/></svg> Verify & Start Quiz';
+        }
+    }
+
+    async function goToStartScreen() {
+        // Start proctoring session
+        quizIdFromUrl = parseInt(quizState.quizId);
+        try {
+            const r = await fetch("/api/proctoring/start", {
+                method: "POST", headers: {"Content-Type": "application/json"}, credentials: "include",
+                body: JSON.stringify({ quiz_id: quizIdFromUrl })
+            });
+            const j = await r.json();
+            if (j.success) proctorSessionId = j.session_id;
+        } catch(e) { console.log("Proctoring start failed:", e); }
+
+        document.getElementById("camera-setup-screen").classList.add("hidden");
+        document.getElementById("start-screen").classList.remove("hidden");
+
+        document.getElementById("quiz-title").textContent = "Loading Quiz...";
+        try {
+            var reloadResult = await apiRequest('/api/student/quiz/' + quizState.quizId + '/start');
+            if (reloadResult.success && reloadResult.data) {
+                quizState.quizData = reloadResult.data;
+                quizState.quizTitle = reloadResult.data.quiz.topic;
+                document.getElementById("quiz-title").textContent = quizState.quizTitle;
+            }
+        } catch(e) {
+            console.error("Failed to reload quiz data:", e);
+        }
+    }
+
+    async function skipCameraSetup() {
+        document.getElementById("camera-status-msg").textContent = "Starting proctoring without camera...";
+        quizIdFromUrl = parseInt(quizState.quizId);
+        try {
+            const r = await fetch("/api/proctoring/start", {
+                method: "POST", headers: {"Content-Type": "application/json"}, credentials: "include",
+                body: JSON.stringify({ quiz_id: quizIdFromUrl })
+            });
+            const j = await r.json();
+            if (j.success) proctorSessionId = j.session_id;
+        } catch(e) {}
+        if (proctorSessionId) {
+            try {
+                await fetch("/api/proctoring/log-event", {
+                    method: "POST", headers: {"Content-Type": "application/json"}, credentials: "include",
+                    body: JSON.stringify({ session_id: proctorSessionId, quiz_id: quizIdFromUrl, event_type: "camera_off", screenshot: "", confidence: 1.0, device_info: navigator.userAgent })
+                });
+            } catch(e) {}
+        }
+        document.getElementById("camera-setup-screen").classList.add("hidden");
+        document.getElementById("start-screen").classList.remove("hidden");
+        document.getElementById("quiz-title").textContent = "Loading Quiz...";
+        try {
+            var reloadResult = await apiRequest('/api/student/quiz/' + quizState.quizId + '/start');
+            if (reloadResult.success && reloadResult.data) {
+                quizState.quizData = reloadResult.data;
+                quizState.quizTitle = reloadResult.data.quiz.topic;
+                document.getElementById("quiz-title").textContent = quizState.quizTitle;
+            }
+        } catch(e) {}
+    }
+
+    async function startCameraMonitoring() {
+        try {
+            cameraStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"user", width:320, height:240}});
+            const video = document.getElementById("quizCamera");
+            video.srcObject = cameraStream;
+            document.getElementById("cameraWidget").style.display = "";
+
+            cameraStream.getVideoTracks()[0].onended = function() {
+                logProctorEvent("camera_off", "", 1.0);
+                document.getElementById("camLabel").textContent = "Camera Off";
+                document.getElementById("camDot").style.background = "#ef4444";
+                document.getElementById("camDot").style.animation = "none";
+            };
+
+            cameraInterval = setInterval(captureAndAnalyze, 5000);
+        } catch(e) {
+            console.log("Camera not available:", e);
+            logProctorEvent("camera_off", "Camera access denied");
+        }
+    }
+
+    let faceVerifyCounter = 0;
+    let aiAnalyzeCounter = 0;
+    let lastAiAnalyzeTime = 0;
+    let prevFrameData = null;
+    let frameCount = 0;
+
+    function captureAndAnalyze() {
+        if (!cameraStream || !proctorSessionId) return;
+        const video = document.getElementById("quizCamera");
+        const canvas = document.getElementById("quizCameraCanvas");
+        canvas.width = video.videoWidth || 320;
+        canvas.height = video.videoHeight || 240;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.5);
+
+        // Flash effect
+        const flash = document.getElementById("captureFlash");
+        if (flash) {
+            flash.classList.add("active");
+            setTimeout(() => flash.classList.remove("active"), 200);
+        }
+
+        // Update status
+        const dot = document.getElementById("camDot");
+        const label = document.getElementById("camLabel");
+        if (dot) { dot.classList.add("capturing"); setTimeout(() => dot.classList.remove("capturing"), 300); }
+        if (label) label.textContent = "Captured";
+
+        frameCount++;
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const pixels = imgData.data;
+        const w = canvas.width, h = canvas.height;
+
+        // ── 1. BRIGHTNESS CHECK ──
+        let totalBrightness = 0;
+        for (let i = 0; i < pixels.length; i += 16) {
+            totalBrightness += (pixels[i] + pixels[i+1] + pixels[i+2]) / 3;
+        }
+        const avgBrightness = totalBrightness / (pixels.length / 16);
+        if (avgBrightness < 30) {
+            triggerEvent("low_light", dataUrl, avgBrightness / 255);
+        }
+
+        // ── 2. FACE DETECTION (skin color region analysis) ──
+        const skinRegions = detectSkinRegions(pixels, w, h);
+        const facePresent = skinRegions.count > 50;
+
+        if (!facePresent && frameCount > 2) {
+            triggerEvent("FACE_NOT_VISIBLE", dataUrl, 0.7);
+        }
+
+        // ── 3. MULTIPLE FACE DETECTION (multiple skin clusters) ──
+        if (skinRegions.clusters >= 2) {
+            triggerEvent("MULTIPLE_PEOPLE", dataUrl, 0.6 + (skinRegions.clusters - 2) * 0.1);
+        }
+
+        // ── 4. PHONE/PAPER DETECTION (bright rectangular objects) ──
+        const brightObjects = detectBrightObjects(pixels, w, h, avgBrightness);
+        if (brightObjects.phoneLikely) {
+            triggerEvent("PHONE_VISIBLE", dataUrl, brightObjects.phoneConfidence);
+        }
+        if (brightObjects.paperLikely) {
+            triggerEvent("BOOK_PAPER", dataUrl, brightObjects.paperConfidence);
+        }
+
+        // ── 5. MOTION/ABSENCE DETECTION ──
+        if (prevFrameData && frameCount > 1) {
+            const motionScore = calculateMotion(prevFrameData, pixels);
+            if (motionScore > 0.6) {
+                triggerEvent("SUSPICIOUS_MOVEMENT", dataUrl, motionScore);
+            }
+            if (motionScore < 0.01 && facePresent) {
+                // Very little change — student might be frozen/absent image
+            }
+        }
+        prevFrameData = new Uint8Array(pixels);
+
+        // ── 6. FACE VERIFICATION (every 15s) ──
+        faceVerifyCounter++;
+        if (faceVerifyCounter >= 3) {
+            faceVerifyCounter = 0;
+            verifyFaceDuringQuiz(dataUrl);
+        }
+
+        setTimeout(() => { if (label) label.textContent = "Recording"; }, 1500);
+    }
+
+    // ── SKIN COLOR DETECTION ──
+    function detectSkinRegions(pixels, w, h) {
+        let skinCount = 0;
+        let clusters = 0;
+        let inSkin = false;
+        const rowSkin = [];
+        for (let y = 0; y < h; y += 4) {
+            let rowHasSkin = false;
+            for (let x = 0; x < w; x += 4) {
+                const i = (y * w + x) * 4;
+                const r = pixels[i], g = pixels[i+1], b = pixels[i+2];
+                if (isSkinColor(r, g, b)) {
+                    skinCount++;
+                    rowHasSkin = true;
+                }
+            }
+            rowSkin.push(rowHasSkin);
+        }
+        // Count clusters (transitions from no-skin to skin)
+        for (let i = 1; i < rowSkin.length; i++) {
+            if (rowSkin[i] && !rowSkin[i-1]) clusters++;
+        }
+        return { count: skinCount, clusters: Math.max(1, clusters) };
+    }
+
+    function isSkinColor(r, g, b) {
+        // YCbCr skin color detection
+        const y = 0.299 * r + 0.587 * g + 0.114 * b;
+        const cb = 128 - 0.169 * r - 0.331 * g + 0.500 * b;
+        const cr = 128 + 0.500 * r - 0.419 * g - 0.081 * b;
+        return cr > 135 && cr < 180 && cb > 85 && cb < 135 && y > 80;
+    }
+
+    // ── BRIGHT OBJECT DETECTION (phone/paper) ──
+    function detectBrightObjects(pixels, w, h, avgBrightness) {
+        let brightPixels = 0;
+        let maxBrightRun = 0;
+        let currentRun = 0;
+        // Check horizontal runs of very bright pixels
+        for (let y = 0; y < h; y += 6) {
+            currentRun = 0;
+            for (let x = 0; x < w; x += 2) {
+                const i = (y * w + x) * 4;
+                const brightness = (pixels[i] + pixels[i+1] + pixels[i+2]) / 3;
+                if (brightness > avgBrightness + 60 && brightness > 150) {
+                    currentRun++;
+                    brightPixels++;
+                } else {
+                    maxBrightRun = Math.max(maxBrightRun, currentRun);
+                    currentRun = 0;
+                }
+            }
+            maxBrightRun = Math.max(maxBrightRun, currentRun);
+        }
+        const totalPixels = (w * h) / 8;
+        const brightRatio = brightPixels / totalPixels;
+        // Phone: small bright rectangular region (40-100px wide run)
+        const phoneLikely = maxBrightRun >= 20 && maxBrightRun <= 80 && brightRatio < 0.08;
+        // Paper: large bright area
+        const paperLikely = brightRatio > 0.08 && brightRatio < 0.25;
+        return {
+            phoneLikely,
+            phoneConfidence: phoneLikely ? Math.min(0.9, 0.5 + brightRatio * 3) : 0,
+            paperLikely,
+            paperConfidence: paperLikely ? Math.min(0.85, 0.4 + brightRatio * 2) : 0
+        };
+    }
+
+    // ── MOTION DETECTION ──
+    function calculateMotion(prev, curr) {
+        let diff = 0;
+        const len = Math.min(prev.length, curr.length);
+        for (let i = 0; i < len; i += 32) {
+            diff += Math.abs(prev[i] - curr[i]);
+        }
+        return diff / (len / 32) / 255;
+    }
+
+    function showProctorWarning(type, desc, confidence) {
+        const el = document.getElementById("cameraWarning");
+        const msgEl = document.getElementById("cameraWarningMsg");
+        const titles = {
+            MULTIPLE_PEOPLE: "Multiple People Detected!",
+            PHONE_VISIBLE: "Phone Detected!",
+            BOOK_PAPER: "Notes/Book Detected!",
+            LOOKING_AWAY: "Looking Away!",
+            STUDENT_ABSENT: "Student Absent!",
+            FACE_NOT_VISIBLE: "Face Not Visible!",
+            SUSPICIOUS_MOVEMENT: "Suspicious Movement!",
+            face_mismatch: "Face Mismatch!"
+        };
+        const title = titles[type] || "Warning!";
+        const severity = confidence >= 0.7 ? "HIGH" : confidence >= 0.4 ? "MEDIUM" : "LOW";
+        msgEl.innerHTML = "<strong>" + title + "</strong> (" + severity + " — " + Math.round(confidence * 100) + "%)<br>" + (desc || "");
+        el.style.display = "block";
+        setTimeout(() => { el.style.display = "none"; }, 5000);
+    }
+
+    async function verifyFaceDuringQuiz(photo) {
+        try {
+            const r = await fetch("/api/proctoring/verify-face-live", {
+                method: "POST", headers: {"Content-Type": "application/json"}, credentials: "include",
+                body: JSON.stringify({ quiz_id: quizIdFromUrl, photo: photo })
+            });
+            const j = await r.json();
+            if (!j.success && j.confidence < 0.5) {
+                logProctorEvent("face_mismatch", photo, j.confidence);
+                showProctorWarning("face_mismatch", "Face does not match registered student.", j.confidence);
+            }
+        } catch(e) {}
+    }
+
+    function shouldLogEvent(type) {
+        const now = Date.now();
+        const last = lastEventTime[type] || 0;
+        const cooldown = {
+            face_missing: 5000, multiple_faces: 10000, MULTIPLE_PEOPLE: 10000,
+            camera_off: 10000, mobile_detected: 15000, PHONE_VISIBLE: 15000,
+            looking_away: 8000, LOOKING_AWAY: 8000, low_light: 20000,
+            face_mismatch: 10000, BOOK_PAPER: 15000, STUDENT_ABSENT: 10000,
+            FACE_NOT_VISIBLE: 8000, SUSPICIOUS_MOVEMENT: 10000
+        };
+        if (now - last < (cooldown[type] || 10000)) return false;
+        lastEventTime[type] = now;
+        return true;
+    }
+
+    async function logProctorEvent(type, screenshot, confidence) {
+        if (!proctorSessionId || !shouldLogEvent(type)) return;
+        try {
+            await fetch("/api/proctoring/log-event", {
+                method:"POST", headers:{"Content-Type":"application/json"}, credentials:"include",
+                body: JSON.stringify({
+                    session_id: proctorSessionId, quiz_id: quizIdFromUrl,
+                    event_type: type, screenshot: screenshot || "",
+                    confidence: confidence || 0, device_info: navigator.userAgent
+                })
+            });
+            if (type === "face_missing" || type === "multiple_faces" || type === "camera_off") {
+                showCameraWarning(type);
+            }
+        } catch(e) {}
+    }
+
+    function triggerEvent(type, screenshot, confidence) {
+        logProctorEvent(type, screenshot, confidence);
+    }
+
+    function showCameraWarning(type) {
+        const msgs = {
+            face_missing: "Your face is not visible. Please stay in frame.",
+            multiple_faces: "Multiple faces detected. Only you should be visible.",
+            MULTIPLE_PEOPLE: "Multiple people detected. Only you should be visible.",
+            camera_off: "Camera is off. Please enable your camera.",
+            mobile_detected: "Mobile phone detected. Please remove it.",
+            PHONE_VISIBLE: "Phone detected! Please put it away.",
+            BOOK_PAPER: "Notes or book detected! Remove unauthorized materials.",
+            LOOKING_AWAY: "Please look at the screen.",
+            STUDENT_ABSENT: "No person visible. Please return to your seat.",
+            FACE_NOT_VISIBLE: "Your face is not clearly visible.",
+            SUSPICIOUS_MOVEMENT: "Suspicious movement detected.",
+            face_mismatch: "Face mismatch! Please stay in frame.",
+            student_left: "Please return to your seat."
+        };
+        const el = document.getElementById("cameraWarning");
+        document.getElementById("cameraWarningMsg").textContent = msgs[type] || "Please check your camera.";
+        el.style.display = "block";
+        setTimeout(() => { el.style.display = "none"; }, 4000);
+    }
+
+    // Tab switch detection
+    document.addEventListener("visibilitychange", function() {
+        if (document.hidden && proctorSessionId) {
+            logProctorEvent("looking_away", "", 0.8);
+        }
+    });
+
+    // Before quiz ends
+    window.addEventListener("beforeunload", function() {
+        if (proctorSessionId) {
+            fetch("/api/proctoring/end", {
+                method:"POST", headers:{"Content-Type":"application/json"}, credentials:"include",
+                body: JSON.stringify({session_id: proctorSessionId})
+            });
+            if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
+            if (cameraInterval) clearInterval(cameraInterval);
+        }
+    });
+    </script>
+</body>
+</html>

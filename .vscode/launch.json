@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run AI Learning System",
+            "type": "python",
+            "request": "launch",
+            "module": "run",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "env": {
+                "FLASK_ENV": "development"
+            },
+            "justMyCode": true
+        }
+    ]
+}

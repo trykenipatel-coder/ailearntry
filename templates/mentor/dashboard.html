@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Mentor Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Mentor Dashboard</h1>
+    <p>Manage quizzes and monitor student performance.</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="label">Total Quizzes</div>
+        <div class="value" id="total-quizzes">-</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Total Students</div>
+        <div class="value" id="total-students">-</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Quiz Attempts</div>
+        <div class="value" id="total-attempts">-</div>
+    </div>
+    <div class="stat-card" style="border-left-color:var(--accent)">
+        <div class="label">Quick Actions</div>
+        <div style="margin-top:8px;display:flex;gap:8px">
+            <a href="/mentor/create-quiz" class="btn btn-primary btn-sm">Create Quiz</a>
+            <a href="/mentor/ai-quiz" class="btn btn-success btn-sm">AI Generate</a>
+        </div>
+    </div>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <div class="card-header">Recent Quizzes</div>
+        <div id="recent-quizzes">
+            <div class="loading"><div class="spinner"></div></div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">Student Performance Overview</div>
+        <div class="table-container">
+            <table id="student-performance">
+                <thead>
+                    <tr><th>Name</th><th>Email</th><th>Quizzes</th><th>Avg Accuracy</th><th>Pass/Fail</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="5" style="text-align:center">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/mentor.js"></script>
+<script>
+    loadMentorDashboard();
+    loadStudentPerformance();
+</script>
+{% endblock %}
