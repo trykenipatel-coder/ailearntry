@@ -569,11 +569,13 @@ def admin_quiz_report(qid):
 
 
 import time as _time
+import requests as _requests
 
 def _call_ai_with_retry(system_prompt, user_prompt, max_retries=1):
     """Call OpenRouter AI."""
+    from backend.services.gemini_service import OPENROUTER_URL, OPENROUTER_HEADERS, get_model
     try:
-        resp = requests.post(
+        resp = _requests.post(
             OPENROUTER_URL,
             headers=OPENROUTER_HEADERS,
             json={
@@ -597,9 +599,9 @@ def _call_ai_with_retry(system_prompt, user_prompt, max_retries=1):
             if resp.status_code == 429:
                 return {"success": False, "message": "AI is rate limited. Please wait 30 seconds and try again."}
             return {"success": False, "message": f"AI error: {resp.status_code}"}
-    except requests.exceptions.ConnectionError:
+    except _requests.exceptions.ConnectionError:
         return {"success": False, "message": "Cannot reach AI service. Check your internet connection."}
-    except requests.exceptions.Timeout:
+    except _requests.exceptions.Timeout:
         return {"success": False, "message": "AI service timed out. Please try again."}
     except Exception as e:
         print(f"[AI] Chat exception: {e}")
