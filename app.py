@@ -26,7 +26,10 @@ app.register_blueprint(mentor_bp)
 app.register_blueprint(admin_bp)
 
 FRONTEND_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend")
-UPLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads", "study_materials")
+if os.getenv("VERCEL"):
+    UPLOAD_DIR = "/tmp/uploads/study_materials"
+else:
+    UPLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads", "study_materials")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 _db_initialized = False
