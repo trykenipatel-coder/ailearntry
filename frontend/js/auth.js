@@ -117,9 +117,9 @@ async function checkAuth(redirect = true) {
                     <li class="nav-dropdown">
                         <button class="nav-drop-btn${h('coach') || h('resources') || h('id-verify')}">AI Tools<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg></button>
                         <div class="nav-drop-menu">
-                            <a href="../student/exam-coach.html" class="nav-drop-item${h('coach')}">${I('<path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>')}Exam Coach</a>
+                            <a href="../student/exam-coach.html" class="nav-drop-item${h('coach')}">${I('<path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>')}Exam Coach <span style="display:inline-block;font-size:9px;font-weight:600;padding:1px 6px;border-radius:999px;background:#f59e0b;color:#000;margin-left:4px">Beta</span></a>
                             <a href="../student/id-verification.html" class="nav-drop-item${h('id-verify')}">${I('<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>')}ID Verification</a>
-                            <a href="../student/resources.html" class="nav-drop-item${h('resources')}">${I('<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>')}Resource Explorer</a>
+                            <a href="../student/resources.html" class="nav-drop-item${h('resources')}">${I('<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>')}Resource Explorer <span style="display:inline-block;font-size:9px;font-weight:600;padding:1px 6px;border-radius:999px;background:#f59e0b;color:#000;margin-left:4px">Beta</span></a>
                         </div>
                     </li>`;
             } else if (role === 'mentor') {
@@ -149,8 +149,8 @@ async function checkAuth(redirect = true) {
                             <a href="../mentor/analytics.html" class="nav-drop-item${h('analytics')}">${I('<path d="M18 20V10M12 20V4M6 20v-6"/>')}Analytics</a>
                             <a href="../mentor/interventions.html" class="nav-drop-item${h('intervention')}">${I('<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>')}Interventions</a>
                             <a href="../mentor/proctoring.html" class="nav-drop-item${h('proctor')}">${I('<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>')}Proctoring</a>
-                            <a href="../mentor/student-insight.html" class="nav-drop-item${h('insight')}">${I('<path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>')}Student Insight Bot</a>
-                            <a href="../mentor/resources.html" class="nav-drop-item${h('resources')}">${I('<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>')}Resource Explorer</a>
+                            <a href="../mentor/student-insight.html" class="nav-drop-item${h('insight')}">${I('<path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>')}Student Insight Bot <span style="display:inline-block;font-size:9px;font-weight:600;padding:1px 6px;border-radius:999px;background:#f59e0b;color:#000;margin-left:4px">Beta</span></a>
+                            <a href="../mentor/resources.html" class="nav-drop-item${h('resources')}">${I('<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>')}Resource Explorer <span style="display:inline-block;font-size:9px;font-weight:600;padding:1px 6px;border-radius:999px;background:#f59e0b;color:#000;margin-left:4px">Beta</span></a>
                         </div>
                     </li>`;
             } else if (role === 'admin') {
@@ -169,7 +169,7 @@ async function checkAuth(redirect = true) {
                             <a href="../admin/manage-mentors.html" class="nav-drop-item${h('mentor')}">${I('<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>')}Manage Mentors</a>
                             <a href="../admin/materials.html" class="nav-drop-item${h('material')}">${I('<path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>')}Study Materials</a>
                             <a href="../admin/quizzes.html" class="nav-drop-item${h('quiz')}">${I('<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>')}All Quizzes</a>
-                            <a href="../admin/student-insight.html" class="nav-drop-item${h('insight')}">${I('<path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>')}Student Insight Bot</a>
+                            <a href="../admin/student-insight.html" class="nav-drop-item${h('insight')}">${I('<path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>')}Student Insight Bot <span style="display:inline-block;font-size:9px;font-weight:600;padding:1px 6px;border-radius:999px;background:#f59e0b;color:#000;margin-left:4px">Beta</span></a>
                         </div>
                     </li>`;
             }
